@@ -10,7 +10,8 @@ import { useUserStoreHook } from "@/store/modules/user";
 import { initRouter, getTopMenu } from "@/router/utils";
 import { bg, avatar, illustration } from "./utils/static";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
-import { ref, reactive, toRaw, onMounted, onBeforeUnmount } from "vue";
+import { ReImageVerify } from "@/components/ReImageVerify";
+import { ref, reactive, toRaw, watch, onMounted, onBeforeUnmount } from "vue";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 
 import dayIcon from "@/assets/svg/day.svg?component";
@@ -21,6 +22,7 @@ import User from "@iconify-icons/ri/user-3-fill";
 defineOptions({
   name: "Login"
 });
+const imgCode = ref("");
 const router = useRouter();
 const loading = ref(false);
 const ruleFormRef = ref<FormInstance>();
@@ -33,8 +35,9 @@ dataThemeChange(overallStyle.value);
 const { title } = useNav();
 
 const ruleForm = reactive({
-  username: "admin",
-  password: "admin123"
+  username: "",
+  password: "",
+  verifyCode: ""
 });
 
 const onLogin = async (formEl: FormInstance | undefined) => {
@@ -43,14 +46,16 @@ const onLogin = async (formEl: FormInstance | undefined) => {
     if (valid) {
       loading.value = true;
       useUserStoreHook()
-        .loginByUsername({ username: ruleForm.username, password: "admin123" })
-        .then(res => {
+        .loginByUsername({
+          username: ruleForm.username,
+          password: ruleForm.password
+        })
+        .then(async res => {
           if (res.success) {
             // 获取后端路由
-            return initRouter().then(() => {
-              router.push(getTopMenu(true).path).then(() => {
-                message("登录成功", { type: "success" });
-              });
+            await initRouter();
+            router.push(getTopMenu(true).path).then(() => {
+              message("登录成功", { type: "success" });
             });
           } else {
             message("登录失败", { type: "error" });
@@ -74,6 +79,10 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.document.removeEventListener("keypress", onkeypress);
+});
+
+watch(imgCode, value => {
+  useUserStoreHook().SET_VERIFYCODE(value);
 });
 </script>
 
@@ -136,6 +145,21 @@ onBeforeUnmount(() => {
                   placeholder="密码"
                   :prefix-icon="useRenderIcon(Lock)"
                 />
+              </el-form-item>
+            </Motion>
+
+            <Motion :delay="200">
+              <el-form-item prop="verifyCode">
+                <el-input
+                  v-model="ruleForm.verifyCode"
+                  clearable
+                  placeholder="验证码"
+                  :prefix-icon="useRenderIcon('ri:shield-keyhole-line')"
+                >
+                  <template v-slot:append>
+                    <ReImageVerify v-model:code="imgCode" />
+                  </template>
+                </el-input>
               </el-form-item>
             </Motion>
 

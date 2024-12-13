@@ -7,7 +7,8 @@ import (
 	"main/model"
 	"main/module/user" // 从 module\user\controller.go 中导入 SelelctByUserName() 函数
 	"net/http"         // 从 net/http 中导入 StatusOK() 函数
-	"time"             // 从 time 中导入 Now() 函数
+	"strings"
+	"time" // 从 time 中导入 Now() 函数
 
 	jwt "github.com/appleboy/gin-jwt/v2" // 从 github.com/appleboy/gin-jwt/v2 中导入 GinJWTMiddleware() 函数
 	"github.com/gin-gonic/gin"           // 从 github.com/gin-gonic/gin 中导入 Gin() 函数
@@ -75,6 +76,7 @@ func AuthMiddleWare() *jwt.GinJWTMiddleware {
 			}
 			username := loginVars.UserName
 			password := loginVars.Password
+			logger.Infof("username:%v,password:%v",username,password)
 			res := user.SelelctByUserName(username)
 			userInfo = res
 			if res != nil && (password) == (res.Password) {		
@@ -100,17 +102,22 @@ func AuthMiddleWare() *jwt.GinJWTMiddleware {
 		},
 		// 自定义登录成功的回调函数
 		LoginResponse: func(c *gin.Context, code int, token string, expire time.Time) {
+			// 生成刷新 token
+			roles := strings.Split(userInfo.Roles, ",")
+			permissions := strings.Split(userInfo.Permissions, ",")
 			c.JSON(http.StatusOK, gin.H{
 				"code":   http.StatusOK,
-				"token":  token,
-				"expire": expire.Format(time.RFC3339),
+				"success":  true,
 				"data": gin.H {
-					"message": 		"success",
-					"id":			userInfo.Id,
-					"username":		userInfo.UserName,
-					"name": 		userInfo.Name,
-					"role": 		userInfo.Role,
-					"img":			userInfo.Img,
+					"avatar"		: 	userInfo.Avatar,
+					"id"			:	userInfo.Id,
+					"username"		:	userInfo.UserName,
+					"nickname"		: 	userInfo.Nickname,
+					"roles"			: 	roles,
+					"permissions"	:	permissions,
+					"accessToken"	:	token,
+					"refreshToken"	:	token,
+					"expire"		: 	expire.Format(time.RFC3339),
 				},
 			})
 		},

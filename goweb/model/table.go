@@ -2,19 +2,18 @@ package model
 
 // 用户表
 type User struct {
-	Id         uint64 `gorm:"column:id;primaryKey;autoIncrement;not null" json:"id"`      // 用户id
-	UserName   string `gorm:"column:username;type:varchar(255);not null" json:"username"` // 用户名
-	Password   string `gorm:"column:password;type:varchar(255);not null" json:"password"` // 用户密码
-	Name       string `gorm:"column:name;type:varchar(255);not null" json:"name"`         // 用户姓名
-	Role       int8   `gorm:"column:role;type:int;not null" json:"role"`                  // 用户角色
-	Img        string `gorm:"column:img;type:varchar(255)" json:"img"`                    // 用户头像
-	LoginTime  string `gorm:"column:login_time;type:datetime" json:"login_time"`          // 登录时间
-	LogoutTime string `gorm:"column:logout_time;type:datetime" json:"logout_time"`        // 退出时间
+	Id         			uint64 `gorm:"column:id;primaryKey;autoIncrement;not null" json:"id"`      	// 用户id
+	UserName   			string `gorm:"column:username;type:varchar(255);not null" json:"username"` 	// 用户名
+	Password   			string `gorm:"column:password;type:varchar(255);not null" json:"password"` 	// 用户密码
+	Nickname   			string `gorm:"column:nickname;type:varchar(255);not null" json:"nickname"` 	// 用户昵称
+	Roles      			string `gorm:"column:roles;type:int;not null" json:"roles"`               	// 用户角色
+	Permissions        	string `gorm:"column:permissions;type:varchar(255)" json:"permissions"`     // 用户权限
+	Avatar  			string `gorm:"column:avatar;type:datetime" json:"avatar"`          			// 头像
 }
 
 // 表名
 func (User) TableName() string {
-	return "user"
+	return "users"
 }
 
 // 节点信息表

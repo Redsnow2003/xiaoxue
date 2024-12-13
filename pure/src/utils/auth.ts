@@ -139,3 +139,7 @@ export const hasPerms = (value: string | Array<string>): boolean => {
     : isIncludeAllChildren(value, permissions);
   return isAuths ? true : false;
 };
+
+export const getPerms = (): Array<string> => {
+  return storageLocal().getItem<DataInfo<number>>(userKey)?.permissions ?? [];
+};
