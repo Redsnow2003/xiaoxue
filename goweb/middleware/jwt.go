@@ -1,15 +1,15 @@
 package middleware
 
 import (
+	"errors"
 	"crypto/md5"  // 从 crypto/md5 中导入 Sum() 函数
 	"fmt"         // 从 fmt 中导入 Printf() 函数
 	"main/logger" // 从 main\logger 中导入 Errorf() 函数
 	"main/model"
-	"main/module/user" // 从 module\user\controller.go 中导入 SelelctByUserName() 函数
 	"net/http"         // 从 net/http 中导入 StatusOK() 函数
 	"strings"
 	"time" // 从 time 中导入 Now() 函数
-
+	"gorm.io/gorm"
 	jwt "github.com/appleboy/gin-jwt/v2" // 从 github.com/appleboy/gin-jwt/v2 中导入 GinJWTMiddleware() 函数
 	"github.com/gin-gonic/gin"           // 从 github.com/gin-gonic/gin 中导入 Gin() 函数
 )
@@ -43,9 +43,9 @@ func AuthMiddleWare() *jwt.GinJWTMiddleware {
 		Realm: "gin-jwt",
 		Key: []byte("secret key"),
 		// token 过期时间
-		Timeout: 24 * time.Hour,
+		Timeout: 24 * time.Second,
 		// token 刷新最大时间
-		MaxRefresh: 24 * time.Hour,
+		MaxRefresh: 24 * time.Second,
 		// 身份验证的 key 值
 		IdentityKey: identityKey,
 		// 登录期间的回调的函数
@@ -77,7 +77,7 @@ func AuthMiddleWare() *jwt.GinJWTMiddleware {
 			username := loginVars.UserName
 			password := loginVars.Password
 			logger.Infof("username:%v,password:%v",username,password)
-			res := user.SelelctByUserName(username)
+			res := SelelctByUserName(username)
 			userInfo = res
 			if res != nil && (password) == (res.Password) {		
 				return JwtUser{
@@ -97,7 +97,9 @@ func AuthMiddleWare() *jwt.GinJWTMiddleware {
 		Unauthorized: func(c *gin.Context, code int, message string) {
 			c.JSON(code,gin.H{
 				"code":code,
+				"success":  false,
 				"message":message,
+				"data":gin.H {},
 			})
 		},
 		// 自定义登录成功的回调函数
@@ -108,6 +110,7 @@ func AuthMiddleWare() *jwt.GinJWTMiddleware {
 			c.JSON(http.StatusOK, gin.H{
 				"code":   http.StatusOK,
 				"success":  true,
+				"message": "登录成功",
 				"data": gin.H {
 					"avatar"		: 	userInfo.Avatar,
 					"id"			:	userInfo.Id,
@@ -115,6 +118,19 @@ func AuthMiddleWare() *jwt.GinJWTMiddleware {
 					"nickname"		: 	userInfo.Nickname,
 					"roles"			: 	roles,
 					"permissions"	:	permissions,
+					"accessToken"	:	token,
+					"refreshToken"	:	token,
+					"expire"		: 	expire.Format(time.RFC3339),
+				},
+			})
+		},
+		// token 刷新成功的回调函数
+		RefreshResponse: func(c *gin.Context, code int, token string, expire time.Time) {
+			c.JSON(http.StatusOK, gin.H{
+				"code":   http.StatusOK,
+				"success":  true,
+				"message": "刷新成功",
+				"data": gin.H {
 					"accessToken"	:	token,
 					"refreshToken"	:	token,
 					"expire"		: 	expire.Format(time.RFC3339),
@@ -133,6 +149,18 @@ func AuthMiddleWare() *jwt.GinJWTMiddleware {
 	return authMiddleWare
 }
 
+// 根据用户名查询用户
+func SelelctByUserName(username string) *model.User {
+	db := model.Db
+	u := model.User{}
+	res := db.Where("username = ?", username).First(&u)
+	if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+		logger.Debugf("Select by username err:" + "未查找到相关数据")
+		return nil
+	}
+	return &u
+}
+
 // 获取当前用户
 func GetCurrentUser(c* gin.Context) *model.User{
 
@@ -147,5 +175,5 @@ func GetCurrentUser(c* gin.Context) *model.User{
 	// 从用户信息中解析出用户账号
 	username := claims["id"].(string)
 	// 根据用户账号查询用户信息
-	return user.SelelctByUserName(username)
+	return SelelctByUserName(username)
 }

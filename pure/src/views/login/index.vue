@@ -35,8 +35,8 @@ dataThemeChange(overallStyle.value);
 const { title } = useNav();
 
 const ruleForm = reactive({
-  username: "",
-  password: "",
+  username: "admin",
+  password: "admin123",
   verifyCode: ""
 });
 
@@ -58,7 +58,7 @@ const onLogin = async (formEl: FormInstance | undefined) => {
               message("登录成功", { type: "success" });
             });
           } else {
-            message("登录失败", { type: "error" });
+            message(res.message, { type: "error" });
           }
         })
         .finally(() => (loading.value = false));

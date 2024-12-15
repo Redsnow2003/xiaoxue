@@ -17,3 +17,16 @@ import (
 func LoginHandler(c *gin.Context) {
 	middleware.AuthMiddleWare().LoginHandler(c)
 }
+
+//@Description 刷新token
+//@Summary 刷新token
+//@Accept multipart/form-data
+//@Produce application/json
+//@Param token formData string true "token"
+//@Success 200 {json} json "{"code": 200,"data": {"id": 2,"img": "","message": "success", "name": "管理员", "role": 1,"username": "admin" }, "expire": "expire-time", "token
+//@Failure 500 "刷新token出错"
+//@Router /refresh-token [POST]
+func RefreshTokenHandler(c *gin.Context) {
+	middleware.AuthMiddleWare().RefreshHandler(c)
+}
+

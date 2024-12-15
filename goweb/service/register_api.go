@@ -41,29 +41,12 @@ func Init() *gin.Engine {
 	authMiddleware := middleware.AuthMiddleWare()
 
 	r.POST("/login", module.LoginHandler)
-	r.GET("/system/getNodes", module.GetNodes)
-	r.GET("/system/getNodeInfo", module.GetNodeInfo)
-	r.POST("/system/test", module.Test)
-	r.POST("/system/controlNode", module.ControlNode)
-	r.POST("/system/controlProcess", module.ControlProcess)
-	r.GET("/system/getProcesses", module.GetProcesses)
-	r.GET("/device/getDevices", module.GetDevices)
-	r.GET("/device/getDeviceChannels", module.GetDeviceChannels)
-	r.GET("/device/getAnalogPoints", module.GetAnalogPoints)
-	r.GET("/device/getDigitalPoints", module.GetDigitalPoints)
-	r.GET("/device/getProtocolParam", module.GetProtocolParam)
-	r.POST("/device/startSimulator", module.StartSimulator)
-	r.GET("/device/stopSimulator", module.StopSimulator)
-
-
-	r.GET("/ws", module.WsHandler)
-	r.GET("/ws/wsGetRealTimeData", module.WsGetRealTimeData)
+	r.POST("/refresh-token",module.RefreshTokenHandler)
+	r.GET("/get-async-routes", module.GetAsyncRoutes)
 
 	r.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
 		c.JSON(404, gin.H{"code": 404, "message": "Page not found"})
 	})
-
-	Include(userRouter)
 
 	for _, opt := range options {
 		opt(r)
