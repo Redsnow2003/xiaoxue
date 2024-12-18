@@ -21,7 +21,10 @@ import {
   getRoleIds,
   getDeptList,
   getUserList,
-  getAllRoleList
+  getAllRoleList,
+  addUser,
+  updateUser,
+  deleteUser
 } from "@/api/system";
 import {
   ElForm,
@@ -232,8 +235,40 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
   }
 
   function handleDelete(row) {
-    message(`您删除了用户编号为${row.id}的这条数据`, { type: "success" });
-    onSearch();
+    if (row.id === 1) {
+      message("超级管理员不可删除", {
+        type: "warning"
+      });
+      return;
+    }
+    ElMessageBox.confirm(
+      `确认要删除<strong style='color:var(--el-color-primary)'>${
+        row.username
+      }</strong>用户吗?`,
+      "系统提示",
+      {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+        dangerouslyUseHTMLString: true
+      }
+    )
+      .then(() => {
+        // 实际开发中先调用删除接口，再进行下面操作
+        deleteUser({ id: row.id }).then(res => {
+          if (res.success) {
+            message("已成功删除用户", {
+              type: "success"
+            });
+          } else {
+            message(res.message, {
+              type: "error"
+            });
+          }
+        });
+        onSearch();
+      })
+      .catch(() => {});
   }
 
   function handleSizeChange(val: number) {
@@ -272,7 +307,9 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
 
   async function onSearch() {
     loading.value = true;
-    const { data } = await getUserList(toRaw(form));
+    // 将表单数据和分页数据合并
+    var formData = { ...form, ...pagination };
+    const { data } = await getUserList(toRaw(formData));
     dataList.value = data.list;
     pagination.total = data.total;
     pagination.pageSize = data.pageSize;
@@ -321,7 +358,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
           password: row?.password ?? "",
           phone: row?.phone ?? "",
           email: row?.email ?? "",
-          sex: row?.sex ?? "",
+          sex: row?.sex ?? 0,
           status: row?.status ?? 1,
           remark: row?.remark ?? ""
         }
@@ -335,10 +372,12 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
       beforeSure: (done, { options }) => {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
+        curData.dept = {
+          id: Number(curData.higherDeptOptions[0].id),
+          name: String(curData.higherDeptOptions[0].name)
+        };
+        curData.deptId = Number(curData.higherDeptOptions[0].id);
         function chores() {
-          message(`您${title}了用户名称为${curData.username}的这条数据`, {
-            type: "success"
-          });
           done(); // 关闭弹框
           onSearch(); // 刷新表格数据
         }
@@ -347,10 +386,32 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
             console.log("curData", curData);
             // 表单规则校验通过
             if (title === "新增") {
-              // 实际开发先调用新增接口，再进行下面操作
+              addUser(curData).then(res => {
+                if (res.success) {
+                  message("已成功新增用户", {
+                    type: "success"
+                  });
+                  chores();
+                } else {
+                  message(res.message, {
+                    type: "error"
+                  });
+                }
+              });
               chores();
             } else {
-              // 实际开发先调用修改接口，再进行下面操作
+              updateUser(curData).then(res => {
+                if (res.success) {
+                  message("已成功编辑用户", {
+                    type: "success"
+                  });
+                  chores();
+                } else {
+                  message(res.message, {
+                    type: "error"
+                  });
+                }
+              });
               chores();
             }
           }

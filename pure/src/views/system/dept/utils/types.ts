@@ -1,5 +1,6 @@
 interface FormItemProps {
   higherDeptOptions: Record<string, unknown>[];
+  id: number;
   parentId: number;
   name: string;
   principal: string;
@@ -7,6 +8,7 @@ interface FormItemProps {
   email: string;
   sort: number;
   status: number;
+  createTime: string;
   remark: string;
 }
 interface FormProps {

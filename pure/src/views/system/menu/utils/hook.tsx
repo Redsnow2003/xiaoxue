@@ -1,7 +1,7 @@
 import editForm from "../form.vue";
 import { handleTree } from "@/utils/tree";
 import { message } from "@/utils/message";
-import { getMenuList } from "@/api/system";
+import { getMenuList, addMenu, updateMenu, deleteMenu } from "@/api/system";
 import { addDialog } from "@/components/ReDialog";
 import { reactive, ref, onMounted, h } from "vue";
 import type { FormItemProps } from "../utils/types";
@@ -135,18 +135,20 @@ export function useMenu() {
         formInline: {
           menuType: row?.menuType ?? 0,
           higherMenuOptions: formatHigherMenuOptions(cloneDeep(dataList.value)),
+          id: row?.id ?? 0,
           parentId: row?.parentId ?? 0,
           title: row?.title ?? "",
           name: row?.name ?? "",
           path: row?.path ?? "",
           component: row?.component ?? "",
-          rank: row?.rank ?? 99,
+          rank: row?.rank ?? null,
           redirect: row?.redirect ?? "",
           icon: row?.icon ?? "",
           extraIcon: row?.extraIcon ?? "",
           enterTransition: row?.enterTransition ?? "",
           leaveTransition: row?.leaveTransition ?? "",
           activePath: row?.activePath ?? "",
+          roles: row?.roles ?? "admin",
           auths: row?.auths ?? "",
           frameSrc: row?.frameSrc ?? "",
           frameLoading: row?.frameLoading ?? true,
@@ -167,9 +169,6 @@ export function useMenu() {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
         function chores() {
-          message(`您${title}了菜单名称为${curData.title}的这条数据`, {
-            type: "success"
-          });
           done(); // 关闭弹框
           onSearch(); // 刷新表格数据
         }
@@ -178,10 +177,26 @@ export function useMenu() {
             console.log("curData", curData);
             // 表单规则校验通过
             if (title === "新增") {
-              // 实际开发先调用新增接口，再进行下面操作
+              addMenu(curData).then(res => {
+                if (res.success) {
+                  message(`成功添加菜单`, {
+                    type: "success"
+                  });
+                } else {
+                  message(res.message, { type: "error" });
+                }
+              });
               chores();
             } else {
-              // 实际开发先调用修改接口，再进行下面操作
+              updateMenu(curData).then(res => {
+                if (res.success) {
+                  message(`成功修改菜单数据`, {
+                    type: "success"
+                  });
+                } else {
+                  message(res.message, { type: "error" });
+                }
+              });
               chores();
             }
           }
@@ -191,8 +206,16 @@ export function useMenu() {
   }
 
   function handleDelete(row) {
-    message(`您删除了菜单名称为${row.title}的这条数据`, {
-      type: "success"
+    const curData = row as FormItemProps;
+    deleteMenu(curData).then(res => {
+      if (res.success) {
+        message(`成功删除菜单`, {
+          type: "success"
+        });
+      } else {
+        message(res.message, { type: "error" });
+      }
+      onSearch();
     });
     onSearch();
   }

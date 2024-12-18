@@ -180,22 +180,16 @@ const {
               >
                 修改
               </el-button>
-              <el-popconfirm
-                :title="`是否确认删除用户编号为${row.id}的这条数据`"
-                @confirm="handleDelete(row)"
+              <el-button
+                class="reset-margin"
+                link
+                type="primary"
+                :size="size"
+                :icon="useRenderIcon(Delete)"
+                @click="handleDelete(row)"
               >
-                <template #reference>
-                  <el-button
-                    class="reset-margin"
-                    link
-                    type="primary"
-                    :size="size"
-                    :icon="useRenderIcon(Delete)"
-                  >
-                    删除
-                  </el-button>
-                </template>
-              </el-popconfirm>
+                删除
+              </el-button>
               <el-dropdown>
                 <el-button
                   class="ml-3 mt-[2px]"

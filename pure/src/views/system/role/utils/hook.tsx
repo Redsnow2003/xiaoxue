@@ -8,14 +8,23 @@ import { addDialog } from "@/components/ReDialog";
 import type { FormItemProps } from "../utils/types";
 import type { PaginationProps } from "@pureadmin/table";
 import { getKeyList, deviceDetection } from "@pureadmin/utils";
-import { getRoleList, getRoleMenu, getRoleMenuIds } from "@/api/system";
+import {
+  getRoleList,
+  getRoleMenu,
+  getRoleMenuIds,
+  addRole,
+  updateRole,
+  deleteRole,
+  updateRoleStatus,
+  updateRoleMenuIds
+} from "@/api/system";
 import { type Ref, reactive, ref, onMounted, h, toRaw, watch } from "vue";
 
 export function useRole(treeRef: Ref) {
   const form = reactive({
     name: "",
     code: "",
-    status: ""
+    status: "1"
   });
   const curRow = ref();
   const formRef = ref();
@@ -91,17 +100,13 @@ export function useRole(treeRef: Ref) {
       slot: "operation"
     }
   ];
-  // const buttonClass = computed(() => {
-  //   return [
-  //     "!h-[20px]",
-  //     "reset-margin",
-  //     "!text-gray-500",
-  //     "dark:!text-white",
-  //     "dark:hover:!text-primary"
-  //   ];
-  // });
 
-  function onChange({ row, index }) {
+  function onChange({ row }) {
+    if (row.code === "admin") {
+      message("admin角色不允许修改", { type: "warning" });
+      row.status === 0 ? (row.status = 1) : (row.status = 0);
+      return;
+    }
     ElMessageBox.confirm(
       `确认要<strong>${
         row.status === 0 ? "停用" : "启用"
@@ -118,25 +123,7 @@ export function useRole(treeRef: Ref) {
       }
     )
       .then(() => {
-        switchLoadMap.value[index] = Object.assign(
-          {},
-          switchLoadMap.value[index],
-          {
-            loading: true
-          }
-        );
-        setTimeout(() => {
-          switchLoadMap.value[index] = Object.assign(
-            {},
-            switchLoadMap.value[index],
-            {
-              loading: false
-            }
-          );
-          message(`已${row.status === 0 ? "停用" : "启用"}${row.name}`, {
-            type: "success"
-          });
-        }, 300);
+        updateRoleStatus({ id: row.id, status: row.status });
       })
       .catch(() => {
         row.status === 0 ? (row.status = 1) : (row.status = 0);
@@ -144,7 +131,17 @@ export function useRole(treeRef: Ref) {
   }
 
   function handleDelete(row) {
-    message(`您删除了角色名称为${row.name}的这条数据`, { type: "success" });
+    if (row.code === "admin") {
+      message("admin角色不允许修改", { type: "warning" });
+      return;
+    }
+    deleteRole({ id: row.id }).then(res => {
+      if (res.success) {
+        message(res.message, { type: "success" });
+      } else {
+        message(res.message, { type: "error" });
+      }
+    });
     onSearch();
   }
 
@@ -180,13 +177,19 @@ export function useRole(treeRef: Ref) {
   };
 
   function openDialog(title = "新增", row?: FormItemProps) {
+    if (title === "修改" && row.code === "admin") {
+      message("admin角色不允许修改", { type: "warning" });
+      return;
+    }
     addDialog({
       title: `${title}角色`,
       props: {
         formInline: {
+          id: row?.id ?? 0,
           name: row?.name ?? "",
           code: row?.code ?? "",
-          remark: row?.remark ?? ""
+          remark: row?.remark ?? "",
+          status: row?.status ?? 1
         }
       },
       width: "40%",
@@ -199,9 +202,6 @@ export function useRole(treeRef: Ref) {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
         function chores() {
-          message(`您${title}了角色名称为${curData.name}的这条数据`, {
-            type: "success"
-          });
           done(); // 关闭弹框
           onSearch(); // 刷新表格数据
         }
@@ -210,10 +210,22 @@ export function useRole(treeRef: Ref) {
             console.log("curData", curData);
             // 表单规则校验通过
             if (title === "新增") {
-              // 实际开发先调用新增接口，再进行下面操作
+              addRole(curData).then(res => {
+                if (res.success) {
+                  message(res.message, { type: "success" });
+                } else {
+                  message(res.message, { type: "error" });
+                }
+              });
               chores();
             } else {
-              // 实际开发先调用修改接口，再进行下面操作
+              updateRole(curData).then(res => {
+                if (res.success) {
+                  message(res.message, { type: "success" });
+                } else {
+                  message(res.message, { type: "error" });
+                }
+              });
               chores();
             }
           }
@@ -224,6 +236,10 @@ export function useRole(treeRef: Ref) {
 
   /** 菜单权限 */
   async function handleMenu(row?: any) {
+    if (row.code === "admin") {
+      message("admin角色不允许修改", { type: "warning" });
+      return;
+    }
     const { id } = row;
     if (id) {
       curRow.value = row;
@@ -246,11 +262,20 @@ export function useRole(treeRef: Ref) {
 
   /** 菜单权限-保存 */
   function handleSave() {
-    const { id, name } = curRow.value;
-    // 根据用户 id 调用实际项目中菜单权限修改接口
-    console.log(id, treeRef.value.getCheckedKeys());
-    message(`角色名称为${name}的菜单权限修改成功`, {
-      type: "success"
+    const data: {
+      id: number;
+      menus: number[];
+    } = {
+      id: curRow.value.id,
+      menus: treeRef.value.getCheckedKeys()
+    };
+    console.log("data", data);
+    updateRoleMenuIds(data).then(res => {
+      if (res.success) {
+        message(res.message, { type: "success" });
+      } else {
+        message(res.message, { type: "error" });
+      }
     });
   }
 

@@ -20,6 +20,7 @@ const props = withDefaults(defineProps<FormProps>(), {
   formInline: () => ({
     menuType: 0,
     higherMenuOptions: [],
+    id: 0,
     parentId: 0,
     title: "",
     name: "",
@@ -32,6 +33,7 @@ const props = withDefaults(defineProps<FormProps>(), {
     enterTransition: "",
     leaveTransition: "",
     activePath: "",
+    roles: "admin",
     auths: "",
     frameSrc: "",
     frameLoading: true,

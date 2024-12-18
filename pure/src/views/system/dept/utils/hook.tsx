@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import editForm from "../form.vue";
 import { handleTree } from "@/utils/tree";
 import { message } from "@/utils/message";
-import { getDeptList } from "@/api/system";
+import { getDeptList, addDept, updateDept, deleteDept } from "@/api/system";
 import { usePublicHooks } from "../../hooks";
 import { addDialog } from "@/components/ReDialog";
 import { reactive, ref, onMounted, h } from "vue";
@@ -108,6 +108,7 @@ export function useDept() {
       props: {
         formInline: {
           higherDeptOptions: formatHigherDeptOptions(cloneDeep(dataList.value)),
+          id: row?.id ?? 0,
           parentId: row?.parentId ?? 0,
           name: row?.name ?? "",
           principal: row?.principal ?? "",
@@ -115,6 +116,7 @@ export function useDept() {
           email: row?.email ?? "",
           sort: row?.sort ?? 0,
           status: row?.status ?? 1,
+          createTime: row?.createTime ?? "",
           remark: row?.remark ?? ""
         }
       },
@@ -128,22 +130,37 @@ export function useDept() {
         const FormRef = formRef.value.getRef();
         const curData = options.props.formInline as FormItemProps;
         function chores() {
-          message(`您${title}了部门名称为${curData.name}的这条数据`, {
-            type: "success"
-          });
           done(); // 关闭弹框
           onSearch(); // 刷新表格数据
         }
         FormRef.validate(valid => {
           if (valid) {
-            console.log("curData", curData);
             // 表单规则校验通过
             if (title === "新增") {
               // 实际开发先调用新增接口，再进行下面操作
-              chores();
+              console.log("新增", curData);
+              addDept(curData).then(res => {
+                if (res.success) {
+                  message(`成功添加部门`, {
+                    type: "success"
+                  });
+                } else {
+                  message(res.message, { type: "error" });
+                }
+                chores();
+              });
             } else {
               // 实际开发先调用修改接口，再进行下面操作
-              chores();
+              updateDept(curData).then(res => {
+                if (res.success) {
+                  message(`您修改了部门名称为${curData.name}的这条数据`, {
+                    type: "success"
+                  });
+                } else {
+                  message(res.message, { type: "error" });
+                }
+                chores();
+              });
             }
           }
         });
@@ -151,11 +168,19 @@ export function useDept() {
     });
   }
 
-  function handleDelete(row) {
-    message(`您删除了部门名称为${row.name}的这条数据`, { type: "success" });
-    onSearch();
+  function handleDelete(row?: FormItemProps) {
+    const curData = row as FormItemProps;
+    deleteDept(curData).then(res => {
+      if (res.success) {
+        message(`您删除了部门名称为${curData.name}的这条数据`, {
+          type: "success"
+        });
+        onSearch();
+      } else {
+        message(res.message, { type: "error" });
+      }
+    });
   }
-
   onMounted(() => {
     onSearch();
   });

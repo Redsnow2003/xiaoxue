@@ -44,6 +44,15 @@ func Init() *gin.Engine {
 	r.POST("/refresh-token",module.RefreshTokenHandler)
 	r.GET("/get-async-routes", module.GetAsyncRoutes)
 
+	// 部门管理
+	module.RegisterDepartmentRoutes(r)
+	//菜单管理
+	module.RegisterMenuRoutes(r)
+	//角色管理
+	module.RegisterRoleRoutes(r)
+	//用户管理
+	module.RegisterUserRoutes(r)
+
 	r.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
 		c.JSON(404, gin.H{"code": 404, "message": "Page not found"})
 	})

@@ -7,14 +7,15 @@ interface FormItemProps {
   nickname: string;
   username: string;
   password: string;
-  phone: string | number;
+  phone: string;
   email: string;
-  sex: string | number;
+  sex: number;
   status: number;
   dept?: {
     id?: number;
     name?: string;
   };
+  deptId: number;
   remark: string;
 }
 interface FormProps {

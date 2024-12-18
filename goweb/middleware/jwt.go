@@ -43,9 +43,9 @@ func AuthMiddleWare() *jwt.GinJWTMiddleware {
 		Realm: "gin-jwt",
 		Key: []byte("secret key"),
 		// token 过期时间
-		Timeout: 24 * time.Second,
+		Timeout: 24 * time.Hour,
 		// token 刷新最大时间
-		MaxRefresh: 24 * time.Second,
+		MaxRefresh: 24 * time.Hour,
 		// 身份验证的 key 值
 		IdentityKey: identityKey,
 		// 登录期间的回调的函数

@@ -144,6 +144,12 @@ export const handleTree = (
     console.warn("data must be an array");
     return [];
   }
+  for (const d of data) {
+    if (d["rank"] === 0) {
+      d["rank"] = null;
+    }
+  }
+
   const config = {
     id: id || "id",
     parentId: parentId || "parentId",

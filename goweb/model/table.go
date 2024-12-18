@@ -4,11 +4,18 @@ package model
 type User struct {
 	Id         			uint64 `gorm:"column:id;primaryKey;autoIncrement;not null" json:"id"`      	// 用户id
 	UserName   			string `gorm:"column:username;type:varchar(255);not null" json:"username"` 	// 用户名
-	Password   			string `gorm:"column:password;type:varchar(255);not null" json:"password"` 	// 用户密码
 	Nickname   			string `gorm:"column:nickname;type:varchar(255);not null" json:"nickname"` 	// 用户昵称
+	Phone	  			string `gorm:"column:phone;type:varchar(255);not null" json:"phone"`       	// 用户电话
+	Email	   			string `gorm:"column:email;type:varchar(255);not null" json:"email"`        // 用户邮箱
+	Sex 	 			uint8  `gorm:"column:sex;type:tinyint;not null" json:"sex"` 				// 用户性别
+	Status 				uint8  `gorm:"column:status;type:tinyint;not null" json:"status"` 			// 用户状态
+	DeptId 				uint64 `gorm:"column:deptId;type:int;not null" json:"deptId"` 				// 部门id
+	Password   			string `gorm:"column:password;type:varchar(255);not null" json:"password"` 	// 用户密码
 	Roles      			string `gorm:"column:roles;type:int;not null" json:"roles"`               	// 用户角色
 	Permissions        	string `gorm:"column:permissions;type:varchar(255)" json:"permissions"`     // 用户权限
 	Avatar  			string `gorm:"column:avatar;type:datetime" json:"avatar"`          			// 头像
+	CreateTime 			string `gorm:"column:createtime;type:datetime" json:"createtime"`      		// 创建时间
+	Remark 				string `gorm:"column:remark;type:varchar(255)" json:"remark"`      			// 备注
 }
 
 // 表名
@@ -28,9 +35,9 @@ type Menu struct {
 	Rank 				int    `gorm:"column:rank;type:int" json:"rank"`                 	// 菜单排序
 	Redirect  			string `gorm:"column:redirect;type:varchar(255)" json:"redirect"`          	// 菜单重定向
 	Icon 	 			string `gorm:"column:icon;type:varchar(255)" json:"icon"`                 	// 菜单图标
-	ExtralIcon 			string `gorm:"column:extralIcon;type:varchar(255)" json:"extralIcon"`     	// 菜单额外图标
+	ExtraIcon 			string `gorm:"column:extraIcon;type:varchar(255)" json:"extraIcon"`     	// 菜单额外图标
 	EnterTransition 	string `gorm:"column:enterTransition;type:varchar(255)" json:"enterTransition"` // 菜单进入动画
-	LeaveTransition 	string `gorm:"column:leave_transition;type:varchar(255)" json:"leaveTransition"` // 菜单离开动画
+	LeaveTransition 	string `gorm:"column:leaveTransition;type:varchar(255)" json:"leaveTransition"` // 菜单离开动画
 	ActivePath 			string `gorm:"column:leaveTransition;type:varchar(255)" json:"activePath"`      	// 菜单激活路径
 	Roles 				string `gorm:"column:roles;type:varchar(255)" json:"roles"`       	// 菜单角色
 	Auths 				string `gorm:"column:auths;type:varchar(255)" json:"auths"`       	// 菜单权限
@@ -46,4 +53,58 @@ type Menu struct {
 // 表名
 func (Menu) TableName() string {
 	return "menu"
+}
+
+// 部门表
+
+type UpdateDeptData struct{
+	Id         			uint64 `gorm:"column:id;primaryKey;autoIncrement;not null" json:"id"`      	// 部门id
+	ParentId   			uint64 `gorm:"column:parentId;type:int;not null" json:"parentId"`        	// 父级id
+	Name   				string `gorm:"column:name;type:varchar(255);not null" json:"name"` 			// 部门名称
+	Sort 				uint8  `gorm:"column:sort;type:tinyint" json:"sort"`      					// 部门排序
+	Phone  				string `gorm:"column:phone;type:varchar(255)" json:"phone"`      			// 部门电话
+	Principal  			string `gorm:"column:principal;type:varchar(255)" json:"principal"`      	// 部门领导
+	Email  				string `gorm:"column:email;type:varchar(255)" json:"email"`          		// 部门邮箱
+	Status 				uint8  `gorm:"column:status;type:tinyint" json:"status"`      				// 部门状态
+	Type 				uint8  `gorm:"column:type;type:tinyint" json:"type"`      					// 部门类型
+	Remark 				string `gorm:"column:remark;type:varchar(255)" json:"remark"`      			// 备注
+}
+
+type Dept struct {
+	UpdateDeptData
+	CreateTime			string `gorm:"column:createTime;type:datetime" json:"createTime"`      		// 创建时间
+}
+
+// 表名
+
+func (UpdateDeptData) TableName() string {
+	return "dept"
+}
+
+func (Dept) TableName() string {
+	return "dept"
+}
+
+// 角色表
+type UpdateRoleData struct{
+	Id         			uint64 `gorm:"column:id;primaryKey;autoIncrement;not null" json:"id"`      	// 角色id
+	Name   				string `gorm:"column:name;type:varchar(255);not null" json:"name"` 			// 角色名称
+	Code  				string `gorm:"column:code;type:varchar(255);not null" json:"code"`      	// 角色标识
+	Status 				uint8  `gorm:"column:status;type:tinyint" json:"status"`      				// 角色状态
+	Remark 				string `gorm:"column:remark;type:varchar(255)" json:"remark"`      			// 备注
+	UpdateTime 			string `gorm:"column:updateTime;type:datetime" json:"updateTime"`      		// 更新时间
+}
+
+type Role struct {
+	UpdateRoleData
+	CreateTime 			string `gorm:"column:createTime;type:datetime" json:"createTime"`      		// 创建时间
+}
+
+// 表名
+func (UpdateRoleData) TableName() string {
+	return "role"
+}
+
+func (Role) TableName() string {
+	return "role"
 }

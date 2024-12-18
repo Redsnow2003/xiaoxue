@@ -2,6 +2,8 @@ package module
 
 import (
 	"main/model"
+	"main/common"
+	"net/http"
 	"github.com/gin-gonic/gin"
 	"strings"
 )
@@ -13,67 +15,11 @@ import (
 //@Success 200 {json} json "{"code": 200,"data": [{"id": 1,"name": "首页","path": "/home","icon": "el-icon-s-home","children": []}]}"
 //@Failure 500 "获取异步路由出错"
 //@Router /get-async-routes [GET]
-
-/*
-const permissionRouter = {
-  path: "/permission",
-  meta: {
-    title: "menus.purePermission",
-    icon: "ep:lollipop",
-    rank: permission
-  },
-  children: [
-    {
-      path: "/permission/page/index",
-      name: "PermissionPage",
-      meta: {
-        title: "menus.purePermissionPage",
-        roles: ["admin", "common"]
-		c.JSON(200, gin.H{
-			"code": 200,
-			"success": true,
-			"data": data,
-		})
-	}
-    },
-    {
-      path: "/permission/button",
-      meta: {
-        title: "menus.purePermissionButton",
-        roles: ["admin", "common"]
-      },
-      children: [
-        {
-          path: "/permission/button/router",
-          component: "permission/button/index",
-          name: "PermissionButtonRouter",
-          meta: {
-            title: "menus.purePermissionButtonRouter",
-            auths: [
-              "permission:btn:add",
-              "permission:btn:edit",
-              "permission:btn:delete"
-            ]
-          }
-        },
-        {
-          path: "/permission/button/login",
-          component: "permission/button/perms",
-          name: "PermissionButtonLogin",
-          meta: {
-            title: "menus.purePermissionButtonLogin"
-          }
-        }
-      ]
-    }
-  ]
-};
-*/
 func GetAsyncRoutes(c *gin.Context) {
 	menu1 := findMenuItems(0)
 	if menu1 == nil {
-		c.JSON(500, gin.H{
-			"code": 500, 
+		c.JSON(http.StatusOK, gin.H{
+			"code": http.StatusOK, 
 			"success": true,
 			"data": []model.Menu{},
 		})
@@ -99,15 +45,29 @@ func GetAsyncRoutes(c *gin.Context) {
 			meta2["title"] = item2.Title;
 			meta2["icon"] = item2.Icon;
 			roles := strings.Split(item2.Roles, ",")
-			
-			if len(roles) == 0 {
-				roles = append(roles, "admin")
+			roles_len := len(roles)
+			roles_new := make([]string, 0)
+			for i := 0; i < roles_len; i++ {
+				if roles[i] != "" {
+					roles_new = append(roles_new, roles[i])
+				}
+			}
+			if !common.IsContain(roles_new, "admin") {
+				roles_new = append(roles_new, "admin")
 			}
 			
-			meta2["roles"] = roles;
+			meta2["roles"] = roles_new;
+
 			auths := strings.Split(item2.Auths, ",")
-			if(auths != nil) {
-				meta2["auths"] = auths;
+			auths_len := len(auths)
+			auths_new := make([]string, 0)
+			for i := 0; i < auths_len; i++ {
+				if auths[i] != "" {
+					auths_new = append(auths_new, auths[i])
+				}
+			}
+			if(len(auths_new) > 0) {
+				meta2["auths"] = auths_new;
 			}
 			
 			d2["meta"] = meta2;
@@ -116,8 +76,8 @@ func GetAsyncRoutes(c *gin.Context) {
 		d1["children"] = children
 		data = append(data, d1)
 	}
-	c.JSON(200, gin.H{
-		"code": 200, 
+	c.JSON(http.StatusOK, gin.H{
+		"code": http.StatusOK, 
 		"success": true,
 		"data": data,
 	})
