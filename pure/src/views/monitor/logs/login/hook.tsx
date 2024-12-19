@@ -1,10 +1,10 @@
 import dayjs from "dayjs";
 import { message } from "@/utils/message";
 import { getKeyList } from "@pureadmin/utils";
-import { getLoginLogsList } from "@/api/system";
+import { getLoginLogsList, deleteLoginLogs } from "@/api/system";
 import { usePublicHooks } from "@/views/system/hooks";
 import type { PaginationProps } from "@pureadmin/table";
-import { type Ref, reactive, ref, onMounted, toRaw } from "vue";
+import { type Ref, reactive, ref, onMounted } from "vue";
 
 export function useRole(tableRef: Ref) {
   const form = reactive({
@@ -85,11 +85,13 @@ export function useRole(tableRef: Ref) {
   ];
 
   function handleSizeChange(val: number) {
-    console.log(`${val} items per page`);
+    pagination.pageSize = val;
+    onSearch();
   }
 
   function handleCurrentChange(val: number) {
-    console.log(`current page: ${val}`);
+    pagination.currentPage = val;
+    onSearch();
   }
 
   /** 当CheckBox选择项发生变化时会触发该事件 */
@@ -120,16 +122,20 @@ export function useRole(tableRef: Ref) {
 
   /** 清空日志 */
   function clearAll() {
-    // 根据实际业务，调用接口删除所有日志数据
-    message("已删除所有日志数据", {
-      type: "success"
+    deleteLoginLogs().then(res => {
+      if (res.success) {
+        message("清空成功", { type: "success" });
+      } else {
+        message(res.message || "清空失败", { type: "error" });
+      }
     });
     onSearch();
   }
 
   async function onSearch() {
     loading.value = true;
-    const { data } = await getLoginLogsList(toRaw(form));
+    var requestData = { ...form, ...pagination };
+    const { data } = await getLoginLogsList(requestData);
     dataList.value = data.list;
     pagination.total = data.total;
     pagination.pageSize = data.pageSize;

@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
 import { message } from "@/utils/message";
 import { getOnlineLogsList } from "@/api/system";
-import { reactive, ref, onMounted, toRaw } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import type { PaginationProps } from "@pureadmin/table";
 
 export function useRole() {
@@ -62,15 +62,17 @@ export function useRole() {
   ];
 
   function handleSizeChange(val: number) {
-    console.log(`${val} items per page`);
+    pagination.pageSize = val;
+    onSearch();
   }
 
   function handleCurrentChange(val: number) {
-    console.log(`current page: ${val}`);
+    pagination.currentPage = val;
+    onSearch();
   }
 
   function handleSelectionChange(val) {
-    console.log("handleSelectionChange", val);
+    console.log(val);
   }
 
   function handleOffline(row) {
@@ -80,7 +82,8 @@ export function useRole() {
 
   async function onSearch() {
     loading.value = true;
-    const { data } = await getOnlineLogsList(toRaw(form));
+    var requestData = { ...form, ...pagination };
+    const { data } = await getOnlineLogsList(requestData);
     dataList.value = data.list;
     pagination.total = data.total;
     pagination.pageSize = data.pageSize;

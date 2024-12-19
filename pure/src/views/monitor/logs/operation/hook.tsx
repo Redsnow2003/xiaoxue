@@ -1,10 +1,10 @@
 import dayjs from "dayjs";
 import { message } from "@/utils/message";
 import { getKeyList } from "@pureadmin/utils";
-import { getOperationLogsList } from "@/api/system";
+import { getOperationLogsList, deleteOperationLogs } from "@/api/system";
 import { usePublicHooks } from "@/views/system/hooks";
 import type { PaginationProps } from "@pureadmin/table";
-import { type Ref, reactive, ref, onMounted, toRaw } from "vue";
+import { type Ref, reactive, ref, onMounted } from "vue";
 
 export function useRole(tableRef: Ref) {
   const form = reactive({
@@ -125,16 +125,17 @@ export function useRole(tableRef: Ref) {
 
   /** 清空日志 */
   function clearAll() {
-    // 根据实际业务，调用接口删除所有日志数据
-    message("已删除所有日志数据", {
-      type: "success"
+    deleteOperationLogs().then(() => {
+      message("已清空操作日志", { type: "success" });
+      onSearch();
     });
     onSearch();
   }
 
   async function onSearch() {
     loading.value = true;
-    const { data } = await getOperationLogsList(toRaw(form));
+    var requestData = { ...form, ...pagination };
+    const { data } = await getOperationLogsList(requestData);
     dataList.value = data.list;
     pagination.total = data.total;
     pagination.pageSize = data.pageSize;

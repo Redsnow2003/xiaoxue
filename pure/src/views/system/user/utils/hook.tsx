@@ -24,7 +24,12 @@ import {
   getAllRoleList,
   addUser,
   updateUser,
-  deleteUser
+  deleteUser,
+  uploadAvatar,
+  updateUserStatus,
+  resetUserPassword,
+  updateUserRole,
+  deleteBatchUser
 } from "@/api/system";
 import {
   ElForm,
@@ -188,7 +193,15 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
   const curScore = ref();
   const roleOptions = ref([]);
 
-  function onChange({ row, index }) {
+  function onChange({ row }) {
+    console.log(row.id);
+    if (row.id === 1) {
+      message("超级管理员不可停用", {
+        type: "warning"
+      });
+      row.status === 0 ? (row.status = 1) : (row.status = 0);
+      return;
+    }
     ElMessageBox.confirm(
       `确认要<strong>${
         row.status === 0 ? "停用" : "启用"
@@ -205,25 +218,17 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
       }
     )
       .then(() => {
-        switchLoadMap.value[index] = Object.assign(
-          {},
-          switchLoadMap.value[index],
-          {
-            loading: true
+        updateUserStatus({ id: row.id, status: row.status }).then(res => {
+          if (res.success) {
+            message("已成功修改用户状态", {
+              type: "success"
+            });
+          } else {
+            message(res.message, {
+              type: "error"
+            });
           }
-        );
-        setTimeout(() => {
-          switchLoadMap.value[index] = Object.assign(
-            {},
-            switchLoadMap.value[index],
-            {
-              loading: false
-            }
-          );
-          message("已成功修改用户状态", {
-            type: "success"
-          });
-        }, 300);
+        });
       })
       .catch(() => {
         row.status === 0 ? (row.status = 1) : (row.status = 0);
@@ -297,9 +302,23 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
   function onbatchDel() {
     // 返回当前选中的行
     const curSelected = tableRef.value.getTableRef().getSelectionRows();
-    // 接下来根据实际业务，通过选中行的某项数据，比如下面的id，调用接口进行批量删除
-    message(`已删除用户编号为 ${getKeyList(curSelected, "id")} 的数据`, {
-      type: "success"
+    var ids = getKeyList(curSelected, "id");
+    if (ids.includes(1)) {
+      message("超级管理员不可删除", {
+        type: "warning"
+      });
+      return;
+    }
+    deleteBatchUser({ ids: ids }).then(res => {
+      if (res.success) {
+        message("已成功批量删除用户", {
+          type: "success"
+        });
+      } else {
+        message(res.message, {
+          type: "error"
+        });
+      }
     });
     tableRef.value.getTableRef().clearSelection();
     onSearch();
@@ -309,6 +328,8 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
     loading.value = true;
     // 将表单数据和分页数据合并
     var formData = { ...form, ...pagination };
+    //将formData中的deptId转为string类型
+    formData.deptId = String(formData.deptId);
     const { data } = await getUserList(toRaw(formData));
     dataList.value = data.list;
     pagination.total = data.total;
@@ -317,7 +338,7 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
 
     setTimeout(() => {
       loading.value = false;
-    }, 500);
+    }, 100);
   }
 
   const resetForm = formEl => {
@@ -346,13 +367,19 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
   }
 
   function openDialog(title = "新增", row?: FormItemProps) {
+    if (row && row.id === 1) {
+      message("超级管理员不可修改", {
+        type: "warning"
+      });
+      return;
+    }
     addDialog({
       title: `${title}用户`,
       props: {
         formInline: {
           title,
           higherDeptOptions: formatHigherDeptOptions(higherDeptOptions.value),
-          parentId: row?.dept.id ?? 0,
+          parentId: row?.deptId ?? 0,
           nickname: row?.nickname ?? "",
           username: row?.username ?? "",
           password: row?.password ?? "",
@@ -391,7 +418,6 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
                   message("已成功新增用户", {
                     type: "success"
                   });
-                  chores();
                 } else {
                   message(res.message, {
                     type: "error"
@@ -405,7 +431,6 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
                   message("已成功编辑用户", {
                     type: "success"
                   });
-                  chores();
                 } else {
                   message(res.message, {
                     type: "error"
@@ -437,6 +462,21 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
       beforeSure: done => {
         console.log("裁剪后的图片信息：", avatarInfo.value);
         // 根据实际业务使用avatarInfo.value和row里的某些字段去调用上传头像接口即可
+        const data = {
+          id: row.id,
+          avatar: avatarInfo.value
+        };
+        uploadAvatar(data).then(res => {
+          if (res.success) {
+            message("已成功上传头像", {
+              type: "success"
+            });
+          } else {
+            message(res.message, {
+              type: "error"
+            });
+          }
+        });
         done(); // 关闭弹框
         onSearch(); // 刷新表格数据
       },
@@ -510,12 +550,20 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
       beforeSure: done => {
         ruleFormRef.value.validate(valid => {
           if (valid) {
-            // 表单规则校验通过
-            message(`已成功重置 ${row.username} 用户的密码`, {
-              type: "success"
-            });
-            console.log(pwdForm.newPwd);
             // 根据实际业务使用pwdForm.newPwd和row里的某些字段去调用重置用户密码接口即可
+            resetUserPassword({ id: row.id, password: pwdForm.newPwd }).then(
+              res => {
+                if (res.success) {
+                  message("已成功重置用户密码", {
+                    type: "success"
+                  });
+                } else {
+                  message(res.message, {
+                    type: "error"
+                  });
+                }
+              }
+            );
             done(); // 关闭弹框
             onSearch(); // 刷新表格数据
           }
@@ -546,7 +594,34 @@ export function useUser(tableRef: Ref, treeRef: Ref) {
       contentRenderer: () => h(roleForm),
       beforeSure: (done, { options }) => {
         const curData = options.props.formInline as RoleFormItemProps;
-        console.log("curIds", curData.ids);
+        if (curData.ids.length === 0) {
+          message("用户至少拥有一个角色", {
+            type: "warning"
+          });
+          return;
+        }
+        if (row.id === 1) {
+          //将curData.ids转为整型数组
+          var ids = curData.ids as unknown as number[];
+          console.log(ids);
+          if (!ids.includes(1)) {
+            message("超级管理员必须拥有管理员角色", {
+              type: "warning"
+            });
+            return;
+          }
+        }
+        updateUserRole({ userId: row.id, roleIds: curData.ids }).then(res => {
+          if (res.success) {
+            message("已成功分配用户角色", {
+              type: "success"
+            });
+          } else {
+            message(res.message, {
+              type: "error"
+            });
+          }
+        });
         // 根据实际业务使用curData.ids和row里的某些字段去调用修改角色接口即可
         done(); // 关闭弹框
       }

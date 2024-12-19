@@ -1,8 +1,8 @@
 package module
 
 import (
-	"main/model"
 	"main/common"
+	"main/model"
 	"net/http"
 	"strings"
 	"time"
@@ -33,7 +33,7 @@ func addDept(c *gin.Context) {
 	var deptVar model.Dept
 	err := c.ShouldBindJSON(&deptVar)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	parentId := deptVar.ParentId
@@ -44,17 +44,17 @@ func addDept(c *gin.Context) {
 		var dept model.Dept
 		res := db.Where("id = ?", parentId).First(&dept)
 		if res.RowsAffected == 0 {
-			c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "parent department not found"})
+			c.JSON(http.StatusOK, gin.H{"success": false, "message": "parent department not found"})
 			return
 		}
 		//
-		if err := db.Table("dept").Where("parentId = ?", parentId).Select("MAX(id)").Scan(&maxId).Error; err != nil {
+		if err := db.Table("system_dept").Where("parentId = ?", parentId).Select("MAX(id)").Scan(&maxId).Error; err != nil {
 			maxId = int(parentId + 1)
 		} else {
 			maxId = maxId + 1
 		}
 	} else {
-		if err := db.Table("dept").Where("parentId = 0").Select("MAX(id)").Scan(&maxId).Error; err != nil {
+		if err := db.Table("system_dept").Where("parentId = 0").Select("MAX(id)").Scan(&maxId).Error; err != nil {
 			maxId = 100
 		} else {
 			maxId = maxId + 100
@@ -72,7 +72,7 @@ func updateDept(c *gin.Context) {
 	var deptVar model.UpdateDeptData
 	err := c.ShouldBindJSON(&deptVar)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	db := model.Db
@@ -85,7 +85,7 @@ func deleteDept(c *gin.Context) {
 	var deptVar model.UpdateDeptData
 	err := c.ShouldBindJSON(&deptVar)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	db := model.Db
@@ -123,7 +123,7 @@ func addMenu(c *gin.Context) {
 	var menu model.Menu
 	err := c.ShouldBindJSON(&menu)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	parentId := menu.ParentId
@@ -134,17 +134,17 @@ func addMenu(c *gin.Context) {
 		var menu2 model.Menu
 		res := db.Where("id = ?", parentId).First(&menu2)
 		if res.RowsAffected == 0 {
-			c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "parent menu not found"})
+			c.JSON(http.StatusOK, gin.H{"success": false, "message": "parent menu not found"})
 			return
 		}
 		//
-		if err := db.Table("menu").Where("parentId = ?", parentId).Select("MAX(id)").Scan(&maxId).Error; err != nil {
+		if err := db.Table("system_menu").Where("parentId = ?", parentId).Select("MAX(id)").Scan(&maxId).Error; err != nil {
 			maxId = int(parentId + 1)
 		} else {
 			maxId = maxId + 1
 		}
 	} else {
-		if err := db.Table("menu").Where("parentId = 0").Select("MAX(id)").Scan(&maxId).Error; err != nil {
+		if err := db.Table("system_menu").Where("parentId = 0").Select("MAX(id)").Scan(&maxId).Error; err != nil {
 			maxId = 100
 		} else {
 			maxId = maxId + 100
@@ -152,7 +152,7 @@ func addMenu(c *gin.Context) {
 	}
 	menu.Id = uint64(maxId)
 	if db.Create(&menu) == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "create menu failed"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "create menu failed"})
 		return
 	}
 	// Implement logic to create a department
@@ -164,13 +164,13 @@ func updateMenu(c *gin.Context) {
 	var menu model.Menu
 	err := c.ShouldBindJSON(&menu)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	db := model.Db
 	// Implement logic to update a department
 	if db.Save(&menu) == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "update menu failed"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "update menu failed"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "update menu"})
@@ -181,14 +181,14 @@ func deleteMenu(c *gin.Context) {
 	var menu model.Menu
 	err := c.ShouldBindJSON(&menu)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	db := model.Db
 	// Implement logic to delete a department
 	db.Where("parentId = ?", menu.Id).Delete(&model.Menu{})
 	if db.Delete(&menu) == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "delete menu failed"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "delete menu failed"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "delete menu"})
@@ -213,20 +213,20 @@ type statusData struct{
 	Status 				uint8  `gorm:"column:status;type:tinyint" json:"status"`      				// 角色状态
 }
 func (statusData) TableName() string {
-	return "role"
+	return "system_role"
 }
 //更新角色状态
 func updateRoleStatus(c *gin.Context) {
 	var role statusData
 	err := c.ShouldBindJSON(&role)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	db := model.Db
 	// Implement logic to update a department
 	if db.Save(&role) == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "update role failed"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "update role failed"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "update role"})
@@ -241,7 +241,7 @@ type roleMenu struct{
 
 // 表名
 func (roleMenu) TableName() string {
-	return "menu"
+	return "system_menu"
 }
 
 //获取角色菜单
@@ -266,14 +266,14 @@ func updateRoleMenuIds(c *gin.Context) {
 	var roleMenuData roleMenuData
 	err := c.ShouldBindJSON(&roleMenuData)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	db := model.Db
 	var role model.Role
 	res := db.Where("id = ?", roleMenuData.Id).First(&role)
 	if res.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "role not found"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "role not found"})
 		return
 	}
 
@@ -310,14 +310,14 @@ func getRoleMenuIds(c *gin.Context) {
 	var idData idData
 	err := c.ShouldBindJSON(&idData)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	db := model.Db
 	var role model.Role
 	res := db.Where("id = ?", idData.Id).First(&role)
 	if res.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "role not found"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "role not found"})
 		return
 	}
 	roleMenuIds := make([]uint64, 0)
@@ -339,7 +339,7 @@ type roleData struct{
 
 // 表名
 func (roleData) TableName() string {
-	return "role"
+	return "system_role"
 }
 
 //获取所有角色信息
@@ -363,20 +363,20 @@ func getRoleIds(c *gin.Context) {
 	var roleIds roleIds
 	err := c.ShouldBindJSON(&roleIds)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	db := model.Db
 	var user model.User
 	res := db.Where("id = ?", roleIds.UserId).First(&user)
 	if res.RowsAffected == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "user not found"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "user not found"})
 		return
 	}
 	roles := strings.Split(user.Roles,",")
 	roleids := make([]uint64, 0)
-	var _role model.Role
 	for _, role := range roles {
+		var _role model.Role
 		res = db.Where("code = ?", role).First(&_role)
 		if res.RowsAffected == 0 {
 			continue
@@ -409,14 +409,14 @@ func addRole(c *gin.Context) {
 	var role model.Role
 	err := c.ShouldBindJSON(&role)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	role.CreateTime = time.Now().Format("2006-01-02 15:04:05")
 	role.UpdateTime = time.Now().Format("2006-01-02 15:04:05")
 	db := model.Db
 	if db.Create(&role) == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "create role failed"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "create role failed"})
 		return
 	}
 	// Implement logic to create a department
@@ -428,7 +428,7 @@ func updateRole(c *gin.Context) {
 	var role model.UpdateRoleData
 	err := c.ShouldBindJSON(&role)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	db := model.Db
@@ -441,7 +441,7 @@ func updateRole(c *gin.Context) {
 	role.UpdateTime = time.Now().Format("2006-01-02 15:04:05")
 	// Implement logic to update a department
 	if db.Save(&role) == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "update role failed"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "update role failed"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "update role"})
@@ -452,7 +452,7 @@ func deleteRole(c *gin.Context) {
 	var role model.Role
 	err := c.ShouldBindJSON(&role)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	db := model.Db
@@ -522,6 +522,112 @@ func RegisterUserRoutes(router *gin.Engine) {
 	router.POST("/user", addUser)
 	router.PUT("/user", updateUser)
 	router.DELETE("/user", deleteUser)
+	router.POST("/upload-avatar", UploadUserAvatar)
+	router.PUT("/user-status",updateUserStatus)
+	router.PUT("/user-password",updateUserPassword)
+	router.PUT("/user-role",updateUserRoles)
+	router.DELETE("/batch-user",deleteBatchUser)
+}
+
+//批量删除用户信息
+func deleteBatchUser(c *gin.Context) {
+	var ids map[string]interface{}
+	err := c.ShouldBindJSON(&ids)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	idsArr := ids["ids"].([]interface{})
+	db := model.Db
+	for _, id := range idsArr {
+		var user model.User
+		db.Where("id = ?", id).First(&user)
+		db.Delete(&user)
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "delete user"})
+}
+
+//更新用户角色
+func updateUserRoles(c *gin.Context) {
+	var roleData map[string]interface{}
+	err := c.ShouldBindJSON(&roleData)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	userId := uint64(roleData["userId"].(float64))
+	roles := roleData["roleIds"].([]interface{})
+	var roleStr []string
+	db := model.Db
+	for _, roleId := range roles {
+		var role model.Role
+		res := db.Where("id = ?", roleId).First(&role)
+		if res.RowsAffected == 0 {
+			c.JSON(http.StatusOK, gin.H{"success": false, "message": "role not found"})
+			continue
+		}
+		roleStr = append(roleStr, role.Code)
+	}
+	roleStrs := strings.Join(roleStr, ",")
+
+	// Implement logic to update a department
+	if err := db.Model(&model.User{Id: userId}).Update("roles",roleStrs).Error; err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "update user failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "update user"})
+}
+type userPassword struct{
+	Id         			uint64 `gorm:"column:id;primaryKey;autoIncrement;not null" json:"id"`      	// 角色id
+	Password 			string `gorm:"column:password;type:varchar(255);not null" json:"password"`      	// 角色密码
+}
+// 表名
+func (userPassword) TableName() string {
+	return "system_user"
+}
+
+//更新用户密码
+func updateUserPassword(c *gin.Context) {
+	var user userPassword
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	db := model.Db
+	// Implement logic to update a department
+	if db.Save(&user) == nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "update user failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "update user"})
+}
+
+
+type userStatus struct{
+	Id         			uint64 `gorm:"column:id;primaryKey;autoIncrement;not null" json:"id"`      	// 角色id
+	Status 				uint8  `gorm:"column:status;type:tinyint" json:"status"`      				// 角色状态
+}
+// 表名
+func (userStatus) TableName() string {
+	return "system_user"
+}
+
+//更新用户状态
+func updateUserStatus(c *gin.Context) {
+	var user userStatus
+	err := c.ShouldBindJSON(&user)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	db := model.Db
+	// Implement logic to update a department
+	if db.Debug().Save(&user) == nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "update user failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "update user"})
 }
 
 //获取用户信息的条件数据
@@ -541,16 +647,16 @@ func getUserList(c *gin.Context) {
 	var userCondition userCondition
 	err := c.ShouldBindJSON(&userCondition)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	users := []model.User{}
 	db := model.Db
 	if userCondition.Username != "" {
-		db = db.Where("username like ?", userCondition.Username)
+		db = db.Where("username like ?", "%" + userCondition.Username + "%")
 	}
 	if userCondition.Phone != "" {
-		db = db.Where("phone like ?", userCondition.Phone)
+		db = db.Where("phone like ?", "%" + userCondition.Phone+ "%")
 	}
 	if userCondition.Status != "" {
 		db = db.Where("status = ?", userCondition.Status)
@@ -558,18 +664,8 @@ func getUserList(c *gin.Context) {
 	if userCondition.DeptId != "" {
 		db = db.Where("deptId = ?", userCondition.DeptId)
 	}
-	db.Find(&users)
-	total := len(users)
-	pages := total/userCondition.PageSize
-	if total%userCondition.PageSize > 0 {
-		pages++
-	}
-	if userCondition.CurrentPage > pages {
-		userCondition.CurrentPage = pages
-	}
-	if userCondition.CurrentPage < 1 {
-		userCondition.CurrentPage = 1
-	}
+	var total int64
+	db.Model(&model.User{}).Count(&total)
 	offset := (userCondition.CurrentPage - 1) * userCondition.PageSize
 	db.Limit(userCondition.PageSize).Offset(offset).Find(&users)
 
@@ -591,13 +687,13 @@ func addUser(c *gin.Context) {
 	var user model.User
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	user.CreateTime = time.Now().Format("2006-01-02 15:04:05")
 	db := model.Db
 	if db.Create(&user) == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "create user failed"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "create user failed"})
 		return
 	}
 	// Implement logic to create a department
@@ -609,13 +705,13 @@ func updateUser(c *gin.Context) {
 	var user model.User
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	db := model.Db
 	// Implement logic to update a department
 	if db.Save(&user) == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "update user failed"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "update user failed"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "update user"})
@@ -626,11 +722,37 @@ func deleteUser(c *gin.Context) {
 	var user model.User
 	err := c.ShouldBindJSON(&user)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"success": false, "message": "invalid input"})
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
 		return
 	}
 	db := model.Db
 	// Implement logic to delete a department
 	db.Delete(&user)
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "delete user"})
+}
+
+//上传用户头像
+func UploadUserAvatar(c *gin.Context) {
+	data := make(map[string]interface{})
+	err := c.ShouldBindJSON(&data)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	id := data["id"].(float64)
+	avatar := data["avatar"].(map[string]interface{})
+	base64Str := avatar["base64"].(string)
+	db := model.Db
+	var user model.User
+	res := db.Where("id = ?", id).First(&user)
+	if res.RowsAffected == 0 {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "user not found"})
+		return
+	}
+	// Implement logic to update a department
+	file,_:= common.SaveBase64Img(base64Str, "avatar")
+	user.Avatar = file
+	user.CreateTime = time.Now().Format("2006-01-02 15:04:05")
+	db.Save(&user)
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "update user"})
 }

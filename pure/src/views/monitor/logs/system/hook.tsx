@@ -3,9 +3,13 @@ import Detail from "./detail.vue";
 import { message } from "@/utils/message";
 import { addDialog } from "@/components/ReDialog";
 import type { PaginationProps } from "@pureadmin/table";
-import { type Ref, reactive, ref, onMounted, toRaw } from "vue";
+import { type Ref, reactive, ref, onMounted } from "vue";
 import { getKeyList, useCopyToClipboard } from "@pureadmin/utils";
-import { getSystemLogsList, getSystemLogsDetail } from "@/api/system";
+import {
+  getSystemLogsList,
+  getSystemLogsDetail,
+  deleteSystemLogs
+} from "@/api/system";
 import Info from "@iconify-icons/ri/question-line";
 
 export function useRole(tableRef: Ref) {
@@ -25,20 +29,20 @@ export function useRole(tableRef: Ref) {
     background: true
   });
 
-  // const getLevelType = (type, text = false) => {
-  //   switch (type) {
-  //     case 0:
-  //       return text ? "debug" : "primary";
-  //     case 1:
-  //       return text ? "info" : "success";
-  //     case 2:
-  //       return text ? "warn" : "info";
-  //     case 3:
-  //       return text ? "error" : "warning";
-  //     case 4:
-  //       return text ? "fatal" : "danger";
-  //   }
-  // };
+  const getLevelType = (type, text = false) => {
+    switch (type) {
+      case 0:
+        return text ? "debug" : "primary";
+      case 1:
+        return text ? "info" : "success";
+      case 2:
+        return text ? "warn" : "info";
+      case 3:
+        return text ? "error" : "warning";
+      case 4:
+        return text ? "fatal" : "danger";
+    }
+  };
 
   const columns: TableColumnList = [
     {
@@ -98,16 +102,16 @@ export function useRole(tableRef: Ref) {
       prop: "browser",
       minWidth: 100
     },
-    // {
-    //   label: "级别",
-    //   prop: "level",
-    //   minWidth: 90,
-    //   cellRenderer: ({ row, props }) => (
-    //     <el-tag size={props.size} type={getLevelType(row.level)} effect="plain">
-    //       {getLevelType(row.level, true)}
-    //     </el-tag>
-    //   )
-    // },
+    {
+      label: "级别",
+      prop: "level",
+      minWidth: 90,
+      cellRenderer: ({ row, props }) => (
+        <el-tag size={props.size} type={getLevelType(row.level)} effect="plain">
+          {getLevelType(row.level, true)}
+        </el-tag>
+      )
+    },
     {
       label: "请求耗时",
       prop: "takesTime",
@@ -128,20 +132,17 @@ export function useRole(tableRef: Ref) {
       minWidth: 180,
       formatter: ({ requestTime }) =>
         dayjs(requestTime).format("YYYY-MM-DD HH:mm:ss")
-    },
-    {
-      label: "操作",
-      fixed: "right",
-      slot: "operation"
     }
   ];
 
   function handleSizeChange(val: number) {
-    console.log(`${val} items per page`);
+    pagination.pageSize = val;
+    onSearch();
   }
 
   function handleCurrentChange(val: number) {
-    console.log(`current page: ${val}`);
+    pagination.currentPage = val;
+    onSearch();
   }
 
   /** 当CheckBox选择项发生变化时会触发该事件 */
@@ -182,8 +183,12 @@ export function useRole(tableRef: Ref) {
   /** 清空日志 */
   function clearAll() {
     // 根据实际业务，调用接口删除所有日志数据
-    message("已删除所有日志数据", {
-      type: "success"
+    deleteSystemLogs().then(res => {
+      if (res.success) {
+        message("清空成功", { type: "success" });
+      } else {
+        message(res.message || "清空失败", { type: "error" });
+      }
     });
     onSearch();
   }
@@ -204,7 +209,8 @@ export function useRole(tableRef: Ref) {
 
   async function onSearch() {
     loading.value = true;
-    const { data } = await getSystemLogsList(toRaw(form));
+    var requestData = { ...form, ...pagination };
+    const { data } = await getSystemLogsList(requestData);
     dataList.value = data.list;
     pagination.total = data.total;
     pagination.pageSize = data.pageSize;

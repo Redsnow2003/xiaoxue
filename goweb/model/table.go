@@ -20,7 +20,7 @@ type User struct {
 
 // 表名
 func (User) TableName() string {
-	return "users"
+	return "system_user"
 }
 
 // 菜单表
@@ -52,7 +52,7 @@ type Menu struct {
 
 // 表名
 func (Menu) TableName() string {
-	return "menu"
+	return "system_menu"
 }
 
 // 部门表
@@ -78,11 +78,11 @@ type Dept struct {
 // 表名
 
 func (UpdateDeptData) TableName() string {
-	return "dept"
+	return "system_dept"
 }
 
 func (Dept) TableName() string {
-	return "dept"
+	return "system_dept"
 }
 
 // 角色表
@@ -102,9 +102,82 @@ type Role struct {
 
 // 表名
 func (UpdateRoleData) TableName() string {
-	return "role"
+	return "system_role"
 }
 
 func (Role) TableName() string {
-	return "role"
+	return "system_role"
+}
+
+// 在线用户表
+type OnlineUser struct {
+	Id         			uint64 `gorm:"column:id;primaryKey;autoIncrement;not null" json:"id"`      	// 在线用户id
+	Username   			string `gorm:"column:username;type:varchar(255);not null" json:"username"` 	// 用户名
+	IP  				string `gorm:"column:ip;type:varchar(255);not null" json:"ip"` 				// 用户ip
+	Address 			string `gorm:"column:address;type:varchar(255);not null" json:"address"` 	// 用户地址
+	System 				string `gorm:"column:system;type:varchar(255);not null" json:"system"` 	// 用户系统
+	Browser 			string `gorm:"column:browser;type:varchar(255);not null" json:"browser"` 	// 用户浏览器
+	LoginTime 			string `gorm:"column:loginTime;type:datetime;not null" json:"loginTime"` 	// 登录时间
+}
+
+// 表名
+func (OnlineUser) TableName() string {
+	return "log_online"
+}
+
+// 登录日志表
+type LoginLog struct {
+	Id         			uint64 `gorm:"column:id;primaryKey;autoIncrement;not null" json:"id"`      	// 登录日志id
+	Username   			string `gorm:"column:username;type:varchar(255);not null" json:"username"` 	// 用户名
+	IP  				string `gorm:"column:ip;type:varchar(255);not null" json:"ip"` 				// 用户ip
+	Address 			string `gorm:"column:address;type:varchar(255);not null" json:"address"` 	// 用户地址
+	System 				string `gorm:"column:system;type:varchar(255);not null" json:"system"` 	// 用户系统
+	Browser 			string `gorm:"column:browser;type:varchar(255);not null" json:"browser"` 	// 用户浏览器
+	Status 				uint8  `gorm:"column:status;type:tinyint;not null" json:"status"` 			// 登录状态
+	Behavior 			string `gorm:"column:behavior;type:varchar(255);not null" json:"behavior"` 	// 登录行为
+	LoginTime 			string `gorm:"column:loginTime;type:datetime;not null" json:"loginTime"` 	// 登录时间
+}
+
+//表名
+func (LoginLog) TableName() string {
+	return "log_login"
+}
+
+// 操作日志表
+type OperateLog struct {
+	Id         			uint64 `gorm:"column:id;primaryKey;autoIncrement;not null" json:"id"`      	// 操作日志id
+	Username   			string `gorm:"column:username;type:varchar(255);not null" json:"username"` 	// 用户名
+	IP  				string `gorm:"column:ip;type:varchar(255);not null" json:"ip"` 				// 用户ip
+	Address 			string `gorm:"column:address;type:varchar(255);not null" json:"address"` 	// 用户地址
+	System 				string `gorm:"column:system;type:varchar(255);not null" json:"system"` 	// 用户系统
+	Browser 			string `gorm:"column:browser;type:varchar(255);not null" json:"browser"` 	// 用户浏览器
+	Status 				uint8  `gorm:"column:status;type:tinyint;not null" json:"status"` 			// 操作状态
+	Summary 			string `gorm:"column:summary;type:varchar(255);not null" json:"summary"` 	// 操作摘要
+	Module 				string `gorm:"column:module;type:varchar(255);not null" json:"module"` 	// 操作模块
+	OperatingTime 		string `gorm:"column:operatingTime;type:datetime;not null" json:"operatingTime"` // 操作时间
+}
+
+// 表名
+func (OperateLog) TableName() string {
+	return "log_operation"
+}
+
+// 系统日志表
+type SystemLog struct {
+	Id         			uint64 `gorm:"column:id;primaryKey;autoIncrement;not null" json:"id"`      	// 系统日志id
+	Level  				uint8  `gorm:"column:level;type:tinyint;not null" json:"level"` 			// 日志级别
+	Module				string `gorm:"column:module;type:varchar(255);not null" json:"module"` 	// 日志模块
+	Url  				string `gorm:"column:url;type:varchar(255);not null" json:"url"` 				// 请求路径
+	Method 				string `gorm:"column:method;type:varchar(255);not null" json:"method"` 	// 请求方法
+	Ip 					string `gorm:"column:ip;type:varchar(255);not null" json:"ip"` 	// 请求ip
+	Address 			string `gorm:"column:address;type:varchar(255);not null" json:"address"` 	// 请求地址
+	System 				string `gorm:"column:system;type:varchar(255);not null" json:"system"` 	// 请求系统
+	Browser 			string `gorm:"column:browser;type:varchar(255);not null" json:"browser"` 	// 请求浏览器
+	TakesTime 			int	   `gorm:"column:takesTime;type:int;not null" json:"takesTime"` 	// 请求耗时
+	RequestTime 		string `gorm:"column:requestTime;type:datetime;not null" json:"requestTime"` // 请求时间
+}
+
+// 表名
+func (SystemLog) TableName() string {
+	return "log_system"
 }
