@@ -17,10 +17,20 @@ func RegisterDepartmentRoutes(router *gin.Engine) {
 	router.DELETE("/dept", deleteDept)
 }
 
+// @Tags 部门
+// @Summary 获取部门列表
+// @Description 获取所有部门的列表
+// @Produce json
+// @Success 200 {object} gin.H{"success": bool, "data": []model.Dept}
+// @Failure 200 {object} gin.H{"success": bool, "message": string}
+// @Router /dept [get]
 func getDept(c *gin.Context) {
 	db := model.Db
 	depts := []model.Dept{}
-	db.Find(&depts)
+	if err := db.Find(&depts).Error; err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "failed to get departments"})
+		return
+	}
 	// Implement logic to get departments
 	c.JSON(http.StatusOK,
 		gin.H{

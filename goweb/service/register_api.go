@@ -54,6 +54,10 @@ func Init() *gin.Engine {
 	module.RegisterUserRoutes(r)
 	//日志管理
 	module.RegisterLogRoutes(r)
+	//产品管理
+	module.RegisterProductRoutes(r)
+	//供应商管理
+	module.RegisterSupplierRoutes(r)
 
 	r.NoRoute(authMiddleware.MiddlewareFunc(), func(c *gin.Context) {
 		c.JSON(404, gin.H{"code": 404, "message": "Page not found"})

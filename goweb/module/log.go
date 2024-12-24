@@ -12,10 +12,19 @@ func RegisterLogRoutes(router *gin.Engine) {
 	router.POST("/online-logs", getOnlineLogsList)
 	router.POST("/login-logs", getLoginLogsList)
 	router.DELETE("/login-logs", deleteLoginLogs)
+	router.DELETE("/login-logs-ids", deleteLoginLogsIds)
 	router.POST("/operation-logs", getOperationLogsList)
 	router.DELETE("/operation-logs", deleteOperationLogs)
+	router.DELETE("/operation-logs-ids", deleteOperationLogsIds)
 	router.POST("/system-logs", getSystemLogsList)
 	router.DELETE("/system-logs", deleteSystemLogs)
+	router.DELETE("/system-logs-ids", deleteSystemLogsIds)
+}
+
+// @Tags 日志
+// @Summary 通过id删除系统日志
+func deleteSystemLogsIds(c *gin.Context) {
+	deleteLogsIds(c, "log_system")
 }
 
 // @Tags 日志
@@ -31,6 +40,12 @@ func getSystemLogsList(c *gin.Context) {
 }
 
 // @Tags 日志
+// @Summary 通过id删除操作日志
+func deleteOperationLogsIds(c *gin.Context) {
+	deleteLogsIds(c, "log_operation")
+}
+
+// @Tags 日志
 // @Summary 删除操作日志
 func deleteOperationLogs(c *gin.Context) {
 	deleteLogs(c, "log_operation")
@@ -40,6 +55,12 @@ func deleteOperationLogs(c *gin.Context) {
 // @Summary 获取操作日志
 func getOperationLogsList(c *gin.Context) {
 	getLogsList(c, &[]model.OperateLog{}, "operatingTime")
+}
+
+// @Tags 日志
+// @Summary 通过id删除登录日志
+func deleteLoginLogsIds(c *gin.Context) {
+	deleteLogsIds(c, "log_login")
 }
 
 // @Tags 日志
@@ -57,6 +78,18 @@ func getLoginLogsList(c *gin.Context) {
 // @Summary 获取在线用户日志
 func getOnlineLogsList(c *gin.Context) {
 	getLogsList(c, &[]model.OnlineUser{}, "")
+}
+
+// 通过id删除日志的通用函数
+func deleteLogsIds(c *gin.Context, tableName string) {
+	var ids []uint64
+	err := c.BindJSON(&ids)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	model.Db.Where("id in ?", ids).Delete(tableName)
+	c.JSON(http.StatusOK, gin.H{"success": true})
 }
 
 // 删除日志的通用函数
@@ -81,9 +114,13 @@ func getLogsList(c *gin.Context, logModel interface{}, timeField string) {
 	// 根据请求数据构建查询条件
 	for key, value := range requestData {
 		switch key {
-		case "module", "status", "username":
+		case "module", "username":
 			if value != "" {
 				db = db.Where(key+" like ?", "%"+value.(string)+"%")
+			}
+		case "status":
+			if value != "" {
+				db = db.Where("status = ?", value)
 			}
 		case timeField:
 			switch timeRange := value.(type) {
