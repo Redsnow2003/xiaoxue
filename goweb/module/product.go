@@ -20,6 +20,16 @@ func RegisterProductRoutes(router *gin.Engine) {
 	router.DELETE("/product-info", deleteProductInformation)
 	router.POST("/product-info/import", importProductInformation)
 	router.POST("/product-info/export", exportProductInformation)
+	router.POST("/get-product-id-name",getProductInformationIdAndName)
+}
+
+// @Tags 产品
+// @Summary 获取产品id和name
+func getProductInformationIdAndName(c *gin.Context) {
+	db := model.Db
+	var result []model.Product_information
+	db.Select("id, name").Find(&result)
+	c.JSON(http.StatusOK, gin.H{"success": true, "data": result})
 }
 
 // @Tags 产品

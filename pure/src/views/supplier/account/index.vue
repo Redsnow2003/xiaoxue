@@ -4,11 +4,12 @@ import { ref, computed, nextTick, onMounted } from "vue";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { delay, deviceDetection, useResizeObserver } from "@pureadmin/utils";
+import { useProductHandlers } from "./utils/hook";
 import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
 import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
-
+import More2Fill from "@iconify-icons/ri/more-2-fill";
 defineOptions({
   name: "SupplierAccount"
 });
@@ -33,7 +34,7 @@ const iconClass = computed(() => {
 const formRef = ref();
 const tableRef = ref();
 const contentRef = ref();
-
+const { handleConfigProduct } = useProductHandlers();
 const {
   form,
   loading,
@@ -46,11 +47,11 @@ const {
   handleBatchUpdate,
   handleUpdataInfo,
   handleChangeFund,
+  handleChangeFundLog,
   handleUpdateBalance,
   handleDirectOrder,
   handleCheckAccount,
   handleSales,
-  handleConfigProduct,
   handleBalanceLog,
   onSearch,
   resetForm,
@@ -106,9 +107,9 @@ onMounted(async () => {
         >
           <el-option
             v-for="item in templateNameLists"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id"
+            :key="item"
+            :label="item"
+            :value="item"
           />
         </el-select>
       </el-form-item>
@@ -155,11 +156,12 @@ onMounted(async () => {
             :icon="useRenderIcon(AddFill)"
             @click="handleAdd()"
           >
-            新增产品
+            新增供应商
           </el-button>
           <el-button
             type="primary"
             :icon="useRenderIcon(AddFill)"
+            :disabled="selectedNum === 0"
             @click="handleBatchChange()"
           >
             批量修改状态
@@ -213,102 +215,73 @@ onMounted(async () => {
             @page-current-change="handleCurrentChange"
           >
             <template #operation="{ row }">
-              <el-button
-                class="reset-margin"
-                link
-                type="primary"
-                :size="size"
-                :icon="useRenderIcon(EditPen)"
-                @click="handleUpdataInfo(row)"
-              >
-                修改
-              </el-button>
-              <el-button
-                class="reset-margin"
-                link
-                type="primary"
-                :size="size"
-                :icon="useRenderIcon(EditPen)"
-                @click="handleDelete(row)"
-              >
-                删除
-              </el-button>
-              <el-button
-                class="reset-margin"
-                link
-                type="primary"
-                :size="size"
-                :icon="useRenderIcon(EditPen)"
-                @click="handleChangeFund(row)"
-              >
-                资金操作
-              </el-button>
-              <el-popconfirm
-                :title="`是否确认请求上游更新${row.name}的账户余额？`"
-                @confirm="handleUpdateBalance(row)"
-              >
-                <template #reference>
-                  <el-button
-                    class="reset-margin"
-                    link
-                    type="primary"
-                    :size="size"
-                    :icon="useRenderIcon(Delete)"
-                  >
-                    更新上游账户余额
-                  </el-button>
+              <el-dropdown trigger="click">
+                <IconifyIconOffline :icon="More2Fill" class="text-[24px]" />
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleUpdataInfo(row)"
+                    >
+                      管理
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleDelete(row)"
+                    >
+                      删除
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleChangeFund(row)"
+                    >
+                      资金操作
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleChangeFundLog(row)"
+                    >
+                      资金操作日志
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleUpdateBalance(row)"
+                    >
+                      更新上游账户余额
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleBalanceLog(row)"
+                    >
+                      余额更新日志
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleConfigProduct(row)"
+                    >
+                      产品配置
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleSales(row)"
+                    >
+                      资金流水
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleCheckAccount(row)"
+                    >
+                      对账流水
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleDirectOrder(row)"
+                    >
+                      直充供货单
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
                 </template>
-              </el-popconfirm>
-              <el-button
-                class="reset-margin"
-                link
-                type="primary"
-                :size="size"
-                :icon="useRenderIcon(EditPen)"
-                @click="handleBalanceLog(row)"
-              >
-                余额更新日志
-              </el-button>
-              <el-button
-                class="reset-margin"
-                link
-                type="primary"
-                :size="size"
-                :icon="useRenderIcon(EditPen)"
-                @click="handleConfigProduct(row)"
-              >
-                产品配置
-              </el-button>
-              <el-button
-                class="reset-margin"
-                link
-                type="primary"
-                :size="size"
-                :icon="useRenderIcon(EditPen)"
-                @click="handleSales(row)"
-              >
-                资金流水
-              </el-button>
-              <el-button
-                class="reset-margin"
-                link
-                type="primary"
-                :size="size"
-                :icon="useRenderIcon(EditPen)"
-                @click="handleCheckAccount(row)"
-              >
-                对账流水
-              </el-button>
-              <el-button
-                class="reset-margin"
-                link
-                type="primary"
-                :size="size"
-                :icon="useRenderIcon(EditPen)"
-                @click="handleDirectOrder(row)"
-              >
-                直充供货单
-              </el-button>
+              </el-dropdown>
             </template>
           </pure-table>
         </template>

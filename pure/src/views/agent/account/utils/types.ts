@@ -1,32 +1,36 @@
 // 虽然字段很少 但是抽离出来 后续有扩展字段需求就很方便了
 
 interface FormItemProps {
-  /** 供应商ID */
+  /** 代理商ID */
   id: number;
-  /** 供应商名称 */
+  /** 代理商名称 */
   name: string;
-  /** 供应商简称 */
+  /** 代理商简称 */
   nickname: string;
-  /** 供应商部门 */
+  /** 代理商部门 */
   dept: number;
-  /** 供应商电话 */
+  /** 代理商电话 */
   phone: string;
-  /** 供应商邮箱 */
+  /** 代理商邮箱 */
   email: string;
-  /** 我方平台账户余额(元) */
-  our_balance: number;
-  /** 供应商平台账户余额(元) */
-  up_balance: number;
-  /** 上游平台账户余额更新时间 */
-  up_balance_update_time: string;
-  /** 供应商模板 */
-  up_template: string;
-  /** 供应商模板JSON */
-  template_json: string;
+  /** 密钥 */
+  secret_key: string;
+  /** 通知地址 */
+  notification_address: string;
+  /** 通知方式 */
+  notification_method: number;
+  /** 客户 */
+  customer: string;
   /** 状态 */
   status: number;
-  /** 状态信息 */
-  status_info: string;
+  /** 资金余额 */
+  fund_balance: number;
+  /** 授信余额 */
+  credit_balance: number;
+  /** 冻结金额 */
+  frozen_amount: number;
+  /** 缓存可用金额 */
+  cache_amount: number;
   /** 备注 */
   remark: string;
 }
@@ -34,14 +38,7 @@ interface FormProps {
   formInline: FormItemProps;
 }
 
-interface SupplierSimpleItem {
-  /** ID */
-  id: number;
-  /** 名称 */
-  name: string;
-}
-
-interface TemplateNameItem {
+interface AgentSimpleItem {
   /** ID */
   id: number;
   /** 名称 */
@@ -49,8 +46,8 @@ interface TemplateNameItem {
 }
 
 interface ChangeFundFormItemProps {
-  supplier_id: string; // 供应商ID
-  supplier_name: string; // 供应商名称
+  agent_id: string; // 代理商ID
+  agent_name: string; // 代理商名称
   fund_action: string; // 余额操作
   amount: number; // 金额
   confirm_amount: number; // 确认金额
@@ -74,8 +71,7 @@ interface TemplateInfoItem {
 export type {
   FormItemProps,
   FormProps,
-  SupplierSimpleItem,
-  TemplateNameItem,
+  AgentSimpleItem,
   ChangeFundFormProps,
   TemplateInfoItem,
   ChangeFundFormItemProps

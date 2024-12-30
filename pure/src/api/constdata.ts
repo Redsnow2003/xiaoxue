@@ -1,26 +1,57 @@
-// 运营商列表1-话费
-const OperatorList1 = [
+//运营商列表4-全部
+const OperatorListAll = [
   { label: "全网", value: 0 },
   { label: "移动", value: 1 },
-  { label: "电信", value: 2 },
-  { label: "联通", value: 3 },
-  { label: "广电", value: 4 }
-];
-//运营商列表2-话费
-const OperatorList2 = [
-  { label: "移动", value: 0 },
-  { label: "电信", value: 1 },
   { label: "联通", value: 2 },
-  { label: "广电", value: 3 }
+  { label: "电信", value: 3 },
+  { label: "中石油", value: 4 },
+  { label: "权益任意数量", value: 5 },
+  { label: "中石化", value: 6 },
+  { label: "广东石化", value: 7 },
+  { label: "南网", value: 8 },
+  { label: "国网", value: 9 },
+  { label: "广电", value: 10 },
+  { label: "权益通用运营商", value: 11 },
+  { label: "京东礼品卡(直充)", value: 12 },
+  { label: "Q币充值", value: 13 },
+  { label: "前向流量", value: 14 },
+  { label: "卡券通用运营商", value: 15 }
+];
+// 运营商列表1-话费流量
+const OperatorListTelecom = [
+  { label: "全网", value: 0 },
+  { label: "移动", value: 1 },
+  { label: "电信", value: 3 },
+  { label: "联通", value: 2 },
+  { label: "广电", value: 10 }
+];
+//运营商列表2-话费流量-限定运营商
+const OperatorListTelecom2 = [
+  { label: "移动", value: 1 },
+  { label: "电信", value: 3 },
+  { label: "联通", value: 2 },
+  { label: "广电", value: 10 }
 ];
 //运营商列表3-权益
-const OperatorList3 = [
-  { label: "权益任意数量", value: 0 },
-  { label: "权益通用运营商", value: 1 },
-  { label: "京东礼品卡(直充)", value: 2 },
-  { label: "Q币充值", value: 3 },
-  { label: "前向流量", value: 4 }
+const OperatorListRights = [
+  { label: "权益任意数量", value: 5 },
+  { label: "权益通用运营商", value: 11 },
+  { label: "京东礼品卡(直充)", value: 12 },
+  { label: "Q币充值", value: 13 },
+  { label: "前向流量", value: 14 }
 ];
+//运营商列表5-油卡
+const OperatorListOilcard = [
+  { label: "中石油", value: 4 },
+  { label: "中石化", value: 6 },
+  { label: "广东石化", value: 7 }
+];
+//运营商列表6-电费
+const OperatorListPowerbill = [
+  { label: "南网", value: 8 },
+  { label: "国网", value: 9 }
+];
+
 //业务类型列表
 const BusinessTypeList = [
   { label: "话费", value: 1 },
@@ -84,9 +115,12 @@ const ProvinceList = [
 ];
 
 export {
-  OperatorList1,
-  OperatorList2,
-  OperatorList3,
+  OperatorListTelecom,
+  OperatorListTelecom2,
+  OperatorListRights,
+  OperatorListAll,
+  OperatorListOilcard,
+  OperatorListPowerbill,
   ProvinceList,
   UnitList,
   BusinessTypeList

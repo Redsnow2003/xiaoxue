@@ -14,7 +14,7 @@ export const getSupplierTemplateList = (data?: object) => {
 
 /** 供应商管理-模板-获取模板JSON */
 export const getSupplierTemplateJson = (data?: object) => {
-  return http.request<Result>(
+  return http.request<ResultTable>(
     "post",
     baseUrlApi("/get-supplier-template-json"),
     {
@@ -88,4 +88,37 @@ export const supplierChangeFund = (data: object) => {
   return http.request<Result>("post", baseUrlApi("/supplier-change-fund"), {
     data
   });
+};
+
+/** 供应商管理-获取供应商资金操作日志 */
+export const getSupplierFundLog = (data: object) => {
+  return http.request<ResultTable>(
+    "post",
+    baseUrlApi("/get-supplier-fund-log"),
+    {
+      data
+    }
+  );
+};
+
+/** 供应商管理-获取供应商产品列表 */
+export const getSupplierProductList = (data: object) => {
+  return http.request<ResultTable>(
+    "post",
+    baseUrlApi("/get-supplier-product"),
+    {
+      data
+    }
+  );
+};
+
+/** 供应商管理-获取供应商上游余额更新日志 */
+export const getSupplierUpBalanceLog = (data: object) => {
+  return http.request<ResultTable>(
+    "post",
+    baseUrlApi("/get-supplier-up-balance-log"),
+    {
+      data
+    }
+  );
 };

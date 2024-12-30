@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, reactive } from "vue";
 import type { PaginationProps } from "@pureadmin/table";
-import { getSupplierUpBalanceLog } from "@/api/supplier";
+import { getSupplierFundLog } from "@/api/supplier";
 const props = defineProps({
   supplier_id: {
     type: Number,
@@ -26,36 +26,60 @@ const columns: TableColumnList = [
     reserveSelection: true // 数据刷新后保留选项
   },
   {
-    label: "供货单号",
+    label: "ID",
+    prop: "id"
+  },
+  {
+    label: "供应商ID",
     prop: "supplier_id"
   },
   {
-    label: "请求头",
-    prop: "request_header"
+    label: "供应商名称",
+    prop: "supplier_name"
   },
   {
-    label: "请求地址",
-    prop: "request_address"
+    label: "操作",
+    prop: "action",
+    cellRenderer: ({ row }) => {
+      if (row.action === 0) {
+        return "余额加款";
+      } else if (row.action === 1) {
+        return "余额减款";
+      } else {
+        return "余额校正";
+      }
+    }
   },
   {
-    label: "请求参数",
-    prop: "request_params"
+    label: "操作时间",
+    prop: "time"
   },
   {
-    label: "请求时间",
-    prop: "request_time"
+    label: "操作金额(元)",
+    prop: "amount"
   },
   {
-    label: "上游返回",
-    prop: "response_content"
+    label: "操作前余额(元)",
+    prop: "before_amount"
   },
   {
-    label: "返回时间",
-    prop: "response_time"
+    label: "操作后余额(元)",
+    prop: "after_amount"
+  },
+  {
+    label: "凭证图片",
+    prop: "cert_pic",
+    slot: "image"
   },
   {
     label: "备注",
     prop: "remark"
+  },
+  {
+    label: "操作",
+    fixed: "right",
+    width: 210,
+    slot: "operation"
   }
 ];
 onMounted(async () => {
@@ -75,16 +99,18 @@ function handleCurrentChange(val: number) {
   onSearch();
 }
 
-function onSearch() {
-  const requestData = {
+async function onSearch() {
+  var requestData = {
     supplier_id: supplier_id.value,
     currentPage: pagination.currentPage,
     pageSize: pagination.pageSize
   };
-  getSupplierUpBalanceLog(requestData).then(res => {
-    dataList.value = res.data.list;
-    pagination.total = res.data.total;
-  });
+  const { data } = await getSupplierFundLog(requestData);
+  console.log(data);
+  dataList.value = data.list;
+  pagination.total = data.total;
+  pagination.pageSize = data.pageSize;
+  pagination.currentPage = data.currentPage;
 }
 
 defineExpose({ getRef });
@@ -108,5 +134,17 @@ defineExpose({ getRef });
     }"
     @page-size-change="handleSizeChange"
     @page-current-change="handleCurrentChange"
-  />
+  >
+    <template #image="{ row, index }">
+      <el-image
+        preview-teleported
+        loading="lazy"
+        :src="row.cert_pic"
+        :initial-index="index"
+        :preview-src-list="[row.cert_pic]"
+        fit="cover"
+        class="w-[100px] h-[100px]"
+      />
+    </template>
+  </pure-table>
 </template>

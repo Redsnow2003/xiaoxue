@@ -65,6 +65,9 @@ importers:
       pinyin-pro:
         specifier: ^3.24.2
         version: 3.24.2
+      plus-pro-components:
+        specifier: ^0.1.19
+        version: 0.1.19(element-plus@2.8.0(vue@3.4.38(typescript@5.5.4)))(vue@3.4.38(typescript@5.5.4))
       qs:
         specifier: ^6.13.0
         version: 6.13.0
@@ -527,7 +530,7 @@ packages:
     resolution: {integrity: sha512-+nxncfwHM5SgAtrVzgpzJOI1ol0PkumhVo469KCf9lUi21IGcY90G98VuHm9VRrUypmAzawAHO9bs6hqeADaVg==}
 
   '@element-plus/icons-vue@2.3.1':
-    resolution: {integrity: sha512-XxVUZv48RZAd87ucGS48jPf6pKu0yV5UCg9f4FFwtrYxXOwWuVJo6wOvSLKEoMQKjv8GsX/mhP6UsC1lRwbUWg==}
+    resolution: {integrity: sha512-XxVUZv48RZAd87ucGS48jPf6pKu0yV5UCg9f4FFwtrYxXOwWuVJo6wOvSLKEoMQKjv8GsX/mhP6UsC1lRwbUWg==, tarball: https://registry.npmmirror.com/@element-plus/icons-vue/-/icons-vue-2.3.1.tgz}
     peerDependencies:
       vue: ^3.2.0
 
@@ -2399,7 +2402,7 @@ packages:
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
   lodash-es@4.17.21:
-    resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==}
+    resolution: {integrity: sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==, tarball: https://registry.npmmirror.com/lodash-es/-/lodash-es-4.17.21.tgz}
 
   lodash-unified@1.0.3:
     resolution: {integrity: sha512-WK9qSozxXOD7ZJQlpSqOT+om2ZfcT4yO+03FuzAHD0wF6S0l0090LRPDx3vhTTLZ8cFKpBn+IOcVXK6qOcIlfQ==}
@@ -2749,6 +2752,12 @@ packages:
 
   pkg-types@1.1.3:
     resolution: {integrity: sha512-+JrgthZG6m3ckicaOB74TwQ+tBWsFl3qVQg7mN8ulwSOElJ7gBhKzj2VkCPnZ4NlF6kEquYU+RIYNVAvzd54UA==}
+
+  plus-pro-components@0.1.19:
+    resolution: {integrity: sha512-FNboxNJooJ+awYbAhAtIJ/MCS8hAhAmtEY0K5gXIptJIb/VQkWCY+KSPebBwRTgekf8BVut4cB4Zd30TW4ie2A==, tarball: https://registry.npmmirror.com/plus-pro-components/-/plus-pro-components-0.1.19.tgz}
+    peerDependencies:
+      element-plus: ^2.3.4
+      vue: ^3.2.0
 
   popmotion@11.0.5:
     resolution: {integrity: sha512-la8gPM1WYeFznb/JqF4GiTkRRPZsfaj2+kCxqQgr2MJylMmIKUwBfWW8Wa5fml/8gmtlD5yI01MP1QCZPWmppA==}
@@ -6524,6 +6533,14 @@ snapshots:
       mlly: 1.7.1
       pathe: 1.1.2
     optional: true
+
+  plus-pro-components@0.1.19(element-plus@2.8.0(vue@3.4.38(typescript@5.5.4)))(vue@3.4.38(typescript@5.5.4)):
+    dependencies:
+      '@element-plus/icons-vue': 2.3.1(vue@3.4.38(typescript@5.5.4))
+      element-plus: 2.8.0(vue@3.4.38(typescript@5.5.4))
+      lodash-es: 4.17.21
+      sortablejs: 1.15.2
+      vue: 3.4.38(typescript@5.5.4)
 
   popmotion@11.0.5:
     dependencies:

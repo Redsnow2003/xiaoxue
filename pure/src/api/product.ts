@@ -38,6 +38,13 @@ export const getProductInformationList = (data?: object) => {
   });
 };
 
+/** 获取产品管理-所有产品id和名称 */
+export const getProductInformationIdAndName = (data?: object) => {
+  return http.request<Result>("post", baseUrlApi("/get-product-id-name"), {
+    data
+  });
+};
+
 /** 添加产品管理-产品信息 */
 export const addProductInformation = (data?: object) => {
   return http.request<Result>("post", baseUrlApi("/product-info"), { data });

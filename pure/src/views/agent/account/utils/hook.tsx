@@ -1,35 +1,32 @@
-import addForm from "../form/addsupplier.vue";
+import addForm from "../form/addagent.vue";
 import batchChangeForm from "../form/batchchange.vue";
-import balanceLogForm from "../form/balancelog.vue";
 import changeInfoForm from "../form/changeinfo.vue";
 import changeFundForm from "../form/changefund.vue";
-import templateForm from "../form/template.vue";
 import fundLogForm from "../form/fundlog.vue";
+import createAccountForm from "../form/createaccount.vue";
 import { message } from "@/utils/message";
 import { addDialog } from "@/components/ReDialog";
-import type { FormItemProps, SupplierSimpleItem } from "../utils/types";
+import type { FormItemProps, AgentSimpleItem } from "../utils/types";
 import type { PaginationProps } from "@pureadmin/table";
 import { deviceDetection, getKeyList } from "@pureadmin/utils";
 import {
-  getSupplierSimpleList,
-  getSupplierTemplateNameList,
-  addSupplier,
-  updateSupplier,
-  deleteSupplier,
-  getSupplierList,
-  batchUpdateSupplierStatus,
-  batchUpdateSupplierBalance,
-  supplierChangeFund
-} from "@/api/supplier";
+  getAgentSimpleList,
+  getAgentList,
+  addAgent,
+  updateAgent,
+  deleteAgent,
+  changeAgentFund,
+  batchUpdateAgentStatus
+} from "@/api/agent";
 import { type Ref, reactive, ref, onMounted, h } from "vue";
 import { useRouter } from "vue-router";
 
 export function useCategory(tableRef: Ref) {
   const form = reactive({
-    /** 供货商 */
-    name: "",
-    /** 上游模板 */
-    up_template: "",
+    /** 代理商 */
+    id: "",
+    /** 通知方式 */
+    notification_method: "",
     /** 状态 */
     status: ""
   });
@@ -38,8 +35,7 @@ export function useCategory(tableRef: Ref) {
   const dataList = ref([]);
   const selectedNum = ref(0);
   const loading = ref(true);
-  const supplierItemLists = ref([] as SupplierSimpleItem[]);
-  const templateNameLists = ref([]);
+  const agentItemLists = ref([] as AgentSimpleItem[]);
   const pagination = reactive<PaginationProps>({
     total: 0,
     pageSize: 10,
@@ -54,50 +50,44 @@ export function useCategory(tableRef: Ref) {
       reserveSelection: true // 数据刷新后保留选项
     },
     {
-      label: "供应商ID",
+      label: "代理商ID",
       prop: "id"
     },
     {
-      label: "供应商名称",
+      label: "代理商名称",
       prop: "name"
     },
     {
-      label: "我方平台账户余额(元)",
-      prop: "our_balance"
+      label: "账户余额(元)",
+      prop: "fund_balance"
     },
     {
-      label: "上游平台账户余额(元)",
-      prop: "up_balance"
+      label: "授信余额(元)",
+      prop: "credit_balance"
     },
     {
-      label: "上游平台账户余额更新时间",
-      prop: "up_balance_update_time"
+      label: "冻结金额(元)",
+      prop: "frozen_amount"
     },
     {
-      label: "上游模板配置",
-      prop: "up_template",
-      cellRenderer: ({ row }) => (
-        <>
-          {
-            <el-button type="text" onClick={() => handleConfigTemplate(row)}>
-              {row.up_template}
-            </el-button>
-          }
-        </>
-      )
+      label: "缓存可用金额(元)",
+      prop: "cache_amount"
+    },
+    {
+      label: "密钥",
+      prop: "secret_key"
+    },
+    {
+      label: "通知方式",
+      prop: "notification_method"
+    },
+    {
+      label: "状态",
+      prop: "status"
     },
     {
       label: "备注",
       prop: "remark"
-    },
-    {
-      label: "状态",
-      prop: "status",
-      cellRenderer: ({ row }) => <>{row.status === 0 ? "维护" : "上架"}</>
-    },
-    {
-      label: "状态信息",
-      prop: "status_info"
     },
     {
       label: "操作",
@@ -109,7 +99,7 @@ export function useCategory(tableRef: Ref) {
 
   async function handleDelete(row) {
     var ids = [row.id];
-    await deleteSupplier(ids).then(res => {
+    await deleteAgent(ids).then(res => {
       if (res.success) {
         message("删除供应商成功", { type: "success" });
       } else {
@@ -130,7 +120,7 @@ export function useCategory(tableRef: Ref) {
   }
 
   /** 当CheckBox选择项发生变化时会触发该事件 */
-  function handleSelectionChange(val) {
+  function handleSelectionChange(val: Array<any>) {
     selectedNum.value = val.length;
     // 重置表格高度
     tableRef.value.setAdaptive();
@@ -146,8 +136,7 @@ export function useCategory(tableRef: Ref) {
   async function onSearch() {
     loading.value = true;
     var params = { ...form, ...pagination };
-    console.log("params", params);
-    const { data } = await getSupplierList(params);
+    const { data } = await getAgentList(params);
     dataList.value = data.list;
     pagination.total = data.total;
     pagination.pageSize = data.pageSize;
@@ -196,16 +185,17 @@ export function useCategory(tableRef: Ref) {
         }
         FormRef.validate(async valid => {
           if (valid) {
-            console.log("curData", curData);
             var data = {
               ...curData,
-              our_balance: 0,
-              up_balance: 0,
-              up_balance_update_time: null,
+              notification_method: 0,
+              fund_balance: 0,
+              credit_balance: 0,
+              frozen_amount: 0,
+              cache_amount: 0,
               status: 1
             };
             // 表单规则校验通过
-            await addSupplier(data).then(res => {
+            await addAgent(data).then(res => {
               if (res.success) {
                 message("新增成功", { type: "success" });
               } else {
@@ -229,10 +219,8 @@ export function useCategory(tableRef: Ref) {
   onMounted(async () => {
     onSearch();
     // 动态获取产品类别列表
-    const response = await getSupplierSimpleList();
-    supplierItemLists.value = response.data;
-    const response2 = await getSupplierTemplateNameList();
-    templateNameLists.value = response2.data;
+    const response = await getAgentSimpleList();
+    agentItemLists.value = response.data;
   });
 
   function handleBatchChange() {
@@ -259,13 +247,12 @@ export function useCategory(tableRef: Ref) {
           status: options.props.formInline.status as number,
           ids: ids
         };
-        console.log("curData", curData);
         function chores() {
           done(); // 关闭弹框
           onSearch(); // 刷新表格数据
         }
         // 表单规则校验通过
-        await batchUpdateSupplierStatus(curData).then(res => {
+        await batchUpdateAgentStatus(curData).then(res => {
           if (res.success) {
             message("修改成功", { type: "success" });
           } else {
@@ -277,15 +264,7 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  async function handleBatchUpdate() {
-    await batchUpdateSupplierBalance().then(res => {
-      if (res.success) {
-        message("批量更新供应商余额成功", { type: "success" });
-      } else {
-        message(res.message, { type: "error" });
-      }
-    });
-  }
+  function handleBatchUpdate() {}
 
   function handleChangeFund(row?: FormItemProps) {
     addDialog({
@@ -327,7 +306,7 @@ export function useCategory(tableRef: Ref) {
         FormRef.validate(async (valid: any) => {
           if (valid) {
             // 表单规则校验通过
-            await supplierChangeFund(data).then(res => {
+            await changeAgentFund(data).then(res => {
               if (res.success) {
                 message("修改成功", { type: "success" });
               } else {
@@ -357,46 +336,6 @@ export function useCategory(tableRef: Ref) {
     console.log("handleSales", row);
   }
 
-  function handleConfigTemplate(row?: FormItemProps) {
-    addDialog({
-      title: `上游模板`,
-      props: {
-        formInline: {
-          up_template: row?.up_template ?? "",
-          template_json: row?.template_json ?? ""
-        }
-      },
-      width: "60%",
-      draggable: true,
-      fullscreen: deviceDetection(),
-      fullscreenIcon: true,
-      closeOnClickModal: false,
-      contentRenderer: () =>
-        h(templateForm, {
-          formInline: null
-        }),
-      beforeSure: async (done, { options }) => {
-        const curData = {
-          ...row,
-          ...options.props.formInline
-        };
-        console.log("curData", curData);
-        function chores() {
-          done(); // 关闭弹框
-          onSearch(); // 刷新表格数据
-        }
-        await updateSupplier(curData).then(res => {
-          if (res.success) {
-            message("修改成功", { type: "success" });
-          } else {
-            message(res.message, { type: "error" });
-          }
-        });
-        chores();
-      }
-    });
-  }
-
   function handleChangeFundLog(row?: FormItemProps) {
     addDialog({
       title: `资金操作记录`,
@@ -420,7 +359,7 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleBalanceLog(row?: FormItemProps) {
+  function handleCreateAccount(row?: FormItemProps) {
     addDialog({
       title: `余额更新记录`,
       props: {
@@ -432,7 +371,7 @@ export function useCategory(tableRef: Ref) {
       fullscreenIcon: true,
       closeOnClickModal: false,
       contentRenderer: () =>
-        h(balanceLogForm, {
+        h(createAccountForm, {
           ref: formRef,
           supplier_id: 0
         }),
@@ -481,7 +420,7 @@ export function useCategory(tableRef: Ref) {
               status: curData.status as number
             };
             // 表单规则校验通过
-            await updateSupplier(data).then(res => {
+            await updateAgent(data).then(res => {
               if (res.success) {
                 message("修改成功", { type: "success" });
               } else {
@@ -513,7 +452,7 @@ export function useCategory(tableRef: Ref) {
     handleDirectOrder,
     handleCheckAccount,
     handleSales,
-    handleBalanceLog,
+    handleCreateAccount,
     onSearch,
     resetForm,
     handleAdd,
@@ -522,16 +461,13 @@ export function useCategory(tableRef: Ref) {
     handleCurrentChange,
     onSelectionCancel,
     handleSelectionChange,
-    supplierItemLists,
-    templateNameLists
+    agentItemLists
   };
 }
 
 function useProductHandlers() {
   const router = useRouter();
   function handleConfigProduct(row?: FormItemProps) {
-    console.log("handleConfigProduct", row);
-
     if (row && row.id) {
       // 携带参数 row.id 跳转到产品配置页面
       router.push({

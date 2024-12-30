@@ -14,7 +14,7 @@ import {
   exportProductInformation
 } from "@/api/product";
 import { type Ref, reactive, ref, onMounted, h } from "vue";
-import { OperatorList1, UnitList } from "@/api/constdata";
+import { OperatorListTelecom, UnitList } from "@/api/constdata";
 
 export function useCategory(tableRef: Ref) {
   const form = reactive({
@@ -71,7 +71,9 @@ export function useCategory(tableRef: Ref) {
       label: "产品运营商",
       prop: "operator",
       cellRenderer: ({ row }) => (
-        <>{OperatorList1.find(item => item.value == row.operator)?.label}</>
+        <>
+          {OperatorListTelecom.find(item => item.value == row.operator)?.label}
+        </>
       )
     },
     {

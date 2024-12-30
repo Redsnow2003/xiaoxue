@@ -4,8 +4,8 @@ import { formRules } from "./utils/rule";
 import { FormProps, CategoryProps } from "./utils/types";
 import {
   BusinessTypeList,
-  OperatorList1,
-  OperatorList2,
+  OperatorListTelecom,
+  OperatorListTelecom2,
   ProvinceList,
   UnitList
 } from "@/api/constdata";
@@ -83,7 +83,7 @@ defineExpose({ getRef });
     <el-form-item label="运营商" prop="operator">
       <el-select v-model="newFormInline.operator" clearable>
         <el-option
-          v-for="item in OperatorList1"
+          v-for="item in OperatorListTelecom"
           :key="item.value"
           :label="item.label"
           :value="item.value"
@@ -131,7 +131,7 @@ defineExpose({ getRef });
     <el-form-item label="限定运营商" prop="limit_operator" :value-key="'value'">
       <el-select v-model="newFormInline.limit_operator" clearable>
         <el-option
-          v-for="item in OperatorList2"
+          v-for="item in OperatorListTelecom2"
           :key="item.value"
           :label="item.label"
           :value="item.value"

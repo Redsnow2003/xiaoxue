@@ -6,8 +6,8 @@ import AddFill from "@iconify-icons/ri/add-circle-line";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 const props = withDefaults(defineProps<ChangeFundFormProps>(), {
   formInline: () => ({
-    supplier_id: "", // 供应商ID
-    supplier_name: "", // 供应商名称
+    agent_id: "", // 供应商ID
+    agent_name: "", // 供应商名称
     fund_action: "", // 余额操作
     amount: 0, // 金额
     confirm_amount: 0, // 确认金额
@@ -59,27 +59,29 @@ function handleAvatarSuccess(response: any, files: string | any[]) {
     :rules="formRules"
     label-width="82px"
   >
-    <el-form-item label="供应商ID" prop="supplierId">
+    <el-form-item label="供应商ID" prop="agent_id">
       <el-input
-        v-model="newFormInline.supplier_id"
+        v-model="newFormInline.agent_id"
         clearable
         placeholder="供应商ID"
         disabled
       />
     </el-form-item>
-    <el-form-item label="供应商名称" prop="supplierName">
+    <el-form-item label="供应商名称" prop="agent_name">
       <el-input
-        v-model="newFormInline.supplier_name"
+        v-model="newFormInline.agent_name"
         clearable
         placeholder="供应商名称"
         disabled
       />
     </el-form-item>
-    <el-form-item label="余额操作" prop="fundAction">
+    <el-form-item label="余额操作" prop="fund_action">
       <el-select v-model="newFormInline.fund_action" clearable>
         <el-option label="余额加款" value="add" />
         <el-option label="余额减款" value="subtract" />
         <el-option label="余额校正" value="adjust" />
+        <el-option label="授信加款" value="credit_add" />
+        <el-option label="授信减款" value="credit_subtract" />
       </el-select>
     </el-form-item>
     <el-form-item label="金额" prop="amount">
@@ -90,7 +92,7 @@ function handleAvatarSuccess(response: any, files: string | any[]) {
         type="number"
       />
     </el-form-item>
-    <el-form-item label="确认金额" prop="confirmAmount">
+    <el-form-item label="确认金额" prop="confirm_amount">
       <el-input
         v-model="newFormInline.confirm_amount"
         clearable

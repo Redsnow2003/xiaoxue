@@ -4,7 +4,6 @@ import { ref, computed, nextTick, onMounted } from "vue";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { delay, deviceDetection, useResizeObserver } from "@pureadmin/utils";
-import { OperatorList1, ProvinceList } from "@/api/constdata";
 import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
 import Refresh from "@iconify-icons/ep/refresh";

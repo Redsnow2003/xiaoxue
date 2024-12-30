@@ -15,8 +15,8 @@ import {
 } from "@/api/product";
 import { type Ref, reactive, ref, onMounted, h } from "vue";
 import {
-  OperatorList1,
-  OperatorList2,
+  OperatorListTelecom,
+  OperatorListTelecom2,
   ProvinceList,
   UnitList
 } from "@/api/constdata";
@@ -80,7 +80,9 @@ export function useCategory(tableRef: Ref) {
       label: "产品运营商",
       prop: "operator",
       cellRenderer: ({ row }) => (
-        <>{OperatorList1.find(item => item.value == row.operator)?.label}</>
+        <>
+          {OperatorListTelecom.find(item => item.value == row.operator)?.label}
+        </>
       )
     },
     {
@@ -128,8 +130,9 @@ export function useCategory(tableRef: Ref) {
       cellRenderer: ({ row }) => (
         <>
           {
-            OperatorList2.find(province => province.value == row.limit_operator)
-              ?.label
+            OperatorListTelecom2.find(
+              province => province.value == row.limit_operator
+            )?.label
           }
         </>
       )

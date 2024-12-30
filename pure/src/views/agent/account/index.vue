@@ -4,14 +4,14 @@ import { ref, computed, nextTick, onMounted } from "vue";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { delay, deviceDetection, useResizeObserver } from "@pureadmin/utils";
-import { OperatorListTelecom, ProvinceList } from "@/api/constdata";
+import { useProductHandlers } from "./utils/hook";
 import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
 import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
-
+import More2Fill from "@iconify-icons/ri/more-2-fill";
 defineOptions({
-  name: "ProductInformation-OilCard"
+  name: "AgentAccount"
 });
 
 const iconClass = computed(() => {
@@ -34,28 +34,34 @@ const iconClass = computed(() => {
 const formRef = ref();
 const tableRef = ref();
 const contentRef = ref();
-
+const { handleConfigProduct } = useProductHandlers();
 const {
   form,
-  curRow,
   loading,
   columns,
   rowStyle,
   dataList,
   pagination,
   selectedNum,
-  handleImport,
-  handleExport,
+  handleBatchChange,
+  handleBatchUpdate,
+  handleUpdataInfo,
+  handleChangeFund,
+  handleChangeFundLog,
+  handleUpdateBalance,
+  handleDirectOrder,
+  handleCheckAccount,
+  handleSales,
+  handleCreateAccount,
   onSearch,
-  onbatchDel,
   resetForm,
-  openDialog,
+  handleAdd,
   handleDelete,
   handleSizeChange,
   onSelectionCancel,
   handleCurrentChange,
   handleSelectionChange,
-  productCategoryList
+  agentItemLists
 } = useCategory(tableRef);
 
 onMounted(async () => {
@@ -76,73 +82,41 @@ onMounted(async () => {
       :model="form"
       class="search-form bg-bg_color w-[99/100] pl-8 pt-[12px] overflow-auto"
     >
-      <el-form-item label="产品ID：" prop="id">
-        <el-input
-          v-model="form.id"
-          placeholder="请输入产品ID"
-          clearable
-          class="!w-[180px]"
-        />
-      </el-form-item>
-      <el-form-item label="产品名称：" prop="name">
-        <el-input
-          v-model="form.name"
-          placeholder="请输入产品名称"
-          clearable
-          class="!w-[180px]"
-        />
-      </el-form-item>
-      <el-form-item label="产品类别" prop="category">
+      <el-form-item label="代理商" prop="id">
         <el-select
-          v-model="form.category"
-          placeholder="请选择产品类别"
+          v-model="form.id"
+          placeholder="请选择代理商"
           clearable
           class="!w-[180px]"
         >
           <el-option
-            v-for="item in productCategoryList"
+            v-for="item in agentItemLists"
             :key="item.id"
-            :label="item.category_name"
+            :label="item.id + ' ' + item.name"
             :value="item.id"
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="运营商" prop="operator">
+      <el-form-item label="通知方式" prop="notification_method">
         <el-select
-          v-model="form.operator"
-          placeholder="请选择运营商"
+          v-model="form.notification_method"
+          placeholder="请选择通知方式"
           clearable
           class="!w-[180px]"
         >
-          <el-option
-            v-for="item in OperatorListTelecom"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
+          <el-option :key="1" label="可靠通知" :value="0" />
+          <el-option :key="1" label="广播通知" :value="1" />
         </el-select>
       </el-form-item>
-      <el-form-item label="面额" prop="price">
-        <el-input
-          v-model="form.price"
-          placeholder="请输入面额"
-          clearable
-          class="!w-[180px]"
-        />
-      </el-form-item>
-      <el-form-item label="使用范围" prop="scope">
+      <el-form-item label="状态" prop="status">
         <el-select
-          v-model="form.scope"
-          placeholder="请选使用范围"
+          v-model="form.status"
+          placeholder="请选择状态"
           clearable
           class="!w-[180px]"
         >
-          <el-option
-            v-for="item in ProvinceList"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
+          <el-option :key="1" label="维护" :value="0" />
+          <el-option :key="1" label="上架" :value="1" />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -175,23 +149,17 @@ onMounted(async () => {
           <el-button
             type="primary"
             :icon="useRenderIcon(AddFill)"
-            @click="openDialog()"
+            @click="handleAdd()"
           >
-            新增产品
+            新增代理商
           </el-button>
           <el-button
             type="primary"
             :icon="useRenderIcon(AddFill)"
-            @click="handleImport()"
+            :disabled="selectedNum === 0"
+            @click="handleBatchChange()"
           >
-            从系统模板新增
-          </el-button>
-          <el-button
-            type="primary"
-            :icon="useRenderIcon(AddFill)"
-            @click="handleExport()"
-          >
-            导出
+            批量修改状态
           </el-button>
         </template>
         <template v-slot="{ size, dynamicColumns }">
@@ -211,13 +179,6 @@ onMounted(async () => {
                 取消选择
               </el-button>
             </div>
-            <el-popconfirm title="是否确认删除?" @confirm="onbatchDel">
-              <template #reference>
-                <el-button type="danger" text class="mr-1">
-                  批量删除
-                </el-button>
-              </template>
-            </el-popconfirm>
           </div>
           <pure-table
             ref="tableRef"
@@ -242,42 +203,91 @@ onMounted(async () => {
             @page-current-change="handleCurrentChange"
           >
             <template #operation="{ row }">
-              <el-button
-                class="reset-margin"
-                link
-                type="primary"
-                :size="size"
-                :icon="useRenderIcon(EditPen)"
-                @click="openDialog('修改', row)"
-              >
-                修改
-              </el-button>
-              <el-popconfirm
-                :title="`是否确认删除话费类别${row.name}`"
-                @confirm="handleDelete(row)"
-              >
-                <template #reference>
-                  <el-button
-                    class="reset-margin"
-                    link
-                    type="primary"
-                    :size="size"
-                    :icon="useRenderIcon(Delete)"
-                  >
-                    删除
-                  </el-button>
+              <el-dropdown trigger="click">
+                <IconifyIconOffline :icon="More2Fill" class="text-[24px]" />
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleUpdataInfo(row)"
+                    >
+                      修改
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleDelete(row)"
+                    >
+                      删除
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleChangeFund(row)"
+                    >
+                      资金操作
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleChangeFundLog(row)"
+                    >
+                      资金操作日志
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleUpdateBalance(row)"
+                    >
+                      白名单
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleCreateAccount(row)"
+                    >
+                      产品配置
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleConfigProduct(row)"
+                    >
+                      通道配置
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleSales(row)"
+                    >
+                      供货通道
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleCheckAccount(row)"
+                    >
+                      资金流水
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleDirectOrder(row)"
+                    >
+                      直充订单
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleDirectOrder(row)"
+                    >
+                      更新缓存金额
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleDirectOrder(row)"
+                    >
+                      更换密钥
+                    </el-dropdown-item>
+                    <el-dropdown-item
+                      :icon="useRenderIcon(EditPen)"
+                      @click="handleDirectOrder(row)"
+                    >
+                      开户信息
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
                 </template>
-              </el-popconfirm>
-              <el-button
-                class="reset-margin"
-                link
-                type="primary"
-                :size="size"
-                :icon="useRenderIcon(EditPen)"
-                @click="openDialog('复制', row)"
-              >
-                复制
-              </el-button>
+              </el-dropdown>
             </template>
           </pure-table>
         </template>
