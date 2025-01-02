@@ -3,10 +3,10 @@ package config
 import (
 	"fmt"				// 格式化
 	"os"				// 操作系统
-	"path"				// 路径
 	"path/filepath"		// 文件路径
-	"runtime"			// 运行时
 	"gopkg.in/yaml.v3"	// yaml解析
+	"runtime"			// 运行时
+	"path"				// 路径
 )
 
 var configFile []byte	// 配置文件内容
@@ -63,11 +63,13 @@ type Config struct {
 func init() {
 	var err error
 	configFilePath := filepath.Join(getCurrentAbPathByCaller(), "config.yaml")
+	fmt.Println(configFilePath)
 	configFile, err = os.ReadFile(configFilePath)
 	if err != nil {
 		fmt.Printf("Read config yaml file err %v", err)
 	}
 }
+
 
 // 获取当前执行文件绝对路径（go run）
 func getCurrentAbPathByCaller() string {
@@ -78,6 +80,7 @@ func getCurrentAbPathByCaller() string {
 	}
 	return abPath
 }
+
 // 初始化配置文件
 func InitConfig() (config *Config, err error) {
 

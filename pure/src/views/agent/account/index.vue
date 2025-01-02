@@ -34,7 +34,7 @@ const iconClass = computed(() => {
 const formRef = ref();
 const tableRef = ref();
 const contentRef = ref();
-const { handleConfigProduct } = useProductHandlers();
+const { handleWhitelist, handleProductConfig } = useProductHandlers();
 const {
   form,
   loading,
@@ -48,7 +48,6 @@ const {
   handleUpdataInfo,
   handleChangeFund,
   handleChangeFundLog,
-  handleUpdateBalance,
   handleDirectOrder,
   handleCheckAccount,
   handleSales,
@@ -233,20 +232,17 @@ onMounted(async () => {
                     </el-dropdown-item>
                     <el-dropdown-item
                       :icon="useRenderIcon(EditPen)"
-                      @click="handleUpdateBalance(row)"
+                      @click="handleWhitelist(row)"
                     >
                       白名单
                     </el-dropdown-item>
                     <el-dropdown-item
                       :icon="useRenderIcon(EditPen)"
-                      @click="handleCreateAccount(row)"
+                      @click="handleProductConfig(row)"
                     >
                       产品配置
                     </el-dropdown-item>
-                    <el-dropdown-item
-                      :icon="useRenderIcon(EditPen)"
-                      @click="handleConfigProduct(row)"
-                    >
+                    <el-dropdown-item :icon="useRenderIcon(EditPen)">
                       通道配置
                     </el-dropdown-item>
                     <el-dropdown-item

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"main/config"
 	"main/logger"
+	"main/middleware"
 	"main/service"
 )
 
@@ -24,9 +25,14 @@ var configInfo *config.Config
 // @host 127.0.0.1:8080
 // @BasePath /api
 func main() {
+	// 启动定时任务
+	service.StartCron()
+	// 启动redis订阅服务
 	RedisSubService := &service.RedisSubService{}
 	RedisSubService.StartRedisSubService()
+	// 启动api服务
 	service.StartApi()
+	middleware.CloseIpLocation()
 }
 
 func init() {

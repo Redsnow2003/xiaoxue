@@ -79,11 +79,23 @@ export function useCategory(tableRef: Ref) {
     },
     {
       label: "通知方式",
-      prop: "notification_method"
+      prop: "notification_method",
+      cellRenderer: ({ row }) => (
+        <>{row.notification_method === 0 ? "可靠通知" : "广播通知"}</>
+      )
     },
     {
       label: "状态",
-      prop: "status"
+      prop: "status",
+      cellRenderer: ({ row }) => (
+        <>
+          {row.status === 0 ? (
+            <div style="color:red">维护</div>
+          ) : (
+            <div style="color:green">上架</div>
+          )}
+        </>
+      )
     },
     {
       label: "备注",
@@ -97,11 +109,13 @@ export function useCategory(tableRef: Ref) {
     }
   ];
 
-  async function handleDelete(row) {
+  async function handleDelete(row?: FormItemProps) {
+    //添加确认消息框
+
     var ids = [row.id];
     await deleteAgent(ids).then(res => {
       if (res.success) {
-        message("删除供应商成功", { type: "success" });
+        message("删除代理商成功", { type: "success" });
       } else {
         message(res.message, { type: "error" });
       }
@@ -155,7 +169,7 @@ export function useCategory(tableRef: Ref) {
 
   function handleAdd() {
     addDialog({
-      title: `新增供应商`,
+      title: `新增代理商`,
       props: {
         formInline: {
           name: "",
@@ -225,7 +239,7 @@ export function useCategory(tableRef: Ref) {
 
   function handleBatchChange() {
     addDialog({
-      title: `批量修改供应商状态`,
+      title: `批量修改代理商状态`,
       props: {
         formInline: {
           status: 1
@@ -271,8 +285,8 @@ export function useCategory(tableRef: Ref) {
       title: `操作资金`,
       props: {
         formInline: {
-          supplier_id: row?.id ?? "",
-          supplier_name: row?.name ?? "",
+          agent_id: row?.id ?? "",
+          agent_name: row?.name ?? "",
           fund_action: "add",
           amount: 0,
           confirm_amount: 0,
@@ -340,7 +354,7 @@ export function useCategory(tableRef: Ref) {
     addDialog({
       title: `资金操作记录`,
       props: {
-        supplier_id: row?.id ?? ""
+        agent_id: row?.id ?? ""
       },
       width: "70%",
       draggable: true,
@@ -384,16 +398,28 @@ export function useCategory(tableRef: Ref) {
 
   function handleUpdataInfo(row?: FormItemProps) {
     addDialog({
-      title: `修改供应商信息`,
+      title: `修改代理商信息`,
       props: {
         formInline: {
           id: row?.id ?? 0,
           name: row?.name ?? "",
+          nickname: row?.nickname ?? "",
+          dept: row?.dept ?? "",
+          phone: row?.phone ?? "",
+          email: row?.email ?? "",
+          secret_key: row?.secret_key ?? "",
+          notification_address: row?.notification_address ?? "",
+          notification_method: row?.notification_method ?? 0,
+          customer: row?.customer ?? "",
           remark: row?.remark ?? "",
-          status: row?.status ?? 0
+          status: row?.status ?? 0,
+          fund_balance: row?.fund_balance ?? 0,
+          credit_balance: row?.credit_balance ?? 0,
+          frozen_amount: row?.frozen_amount ?? 0,
+          cache_amount: row?.cache_amount ?? 0
         }
       },
-      width: "30%",
+      width: "40%",
       draggable: true,
       fullscreen: deviceDetection(),
       fullscreenIcon: true,
@@ -467,17 +493,38 @@ export function useCategory(tableRef: Ref) {
 
 function useProductHandlers() {
   const router = useRouter();
-  function handleConfigProduct(row?: FormItemProps) {
+  function handleWhitelist(row?: FormItemProps) {
+    console.log("handleWhitelist", row);
     if (row && row.id) {
-      // 携带参数 row.id 跳转到产品配置页面
+      // 携带参数 row.id 跳转到白名单配置页面
       router.push({
-        path: "/supplier/product/index",
-        query: { supplier_id: row.id }
+        path: "/agent/whitelist/index",
+        query: {
+          agent_id: row.id,
+          agent_name: row.name
+        }
       });
     } else {
       console.error("Row or Row ID is missing");
     }
   }
-  return { handleConfigProduct };
+
+  function handleProductConfig(row?: FormItemProps) {
+    console.log("handleProductConfig", row);
+    if (row && row.id) {
+      // 携带参数 row.id 跳转到产品配置页面
+      router.push({
+        path: "/agent/product/index",
+        query: {
+          agent_id: row.id,
+          agent_name: row.name
+        }
+      });
+    } else {
+      console.error("Row or Row ID is missing");
+    }
+  }
+
+  return { handleWhitelist, handleProductConfig };
 }
 export { useProductHandlers };

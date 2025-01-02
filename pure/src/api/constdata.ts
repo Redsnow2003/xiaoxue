@@ -114,6 +114,14 @@ const ProvinceList = [
   { label: "澳门", value: 34 }
 ];
 
+//供货策略
+const SupplyStrategyList = [
+  { label: "权重", value: 0 },
+  { label: "优先级", value: 1 },
+  { label: "全国转分省", value: 2 },
+  { label: "成功率", value: 3 }
+];
+
 export {
   OperatorListTelecom,
   OperatorListTelecom2,
@@ -123,5 +131,6 @@ export {
   OperatorListPowerbill,
   ProvinceList,
   UnitList,
-  BusinessTypeList
+  BusinessTypeList,
+  SupplyStrategyList
 };

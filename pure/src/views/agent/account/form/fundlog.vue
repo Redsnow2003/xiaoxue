@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { onMounted, ref, reactive } from "vue";
 import type { PaginationProps } from "@pureadmin/table";
-import { getSupplierFundLog } from "@/api/supplier";
+import { getAgentFundLog } from "@/api/agent";
 const props = defineProps({
-  supplier_id: {
+  agent_id: {
     type: Number,
     default: 0
   }
 });
 
 const ruleFormRef = ref();
-const supplier_id = ref(props.supplier_id);
+const agent_id = ref(props.agent_id);
 const dataList = ref([]);
 const pagination = reactive<PaginationProps>({
   total: 0,
@@ -30,12 +30,12 @@ const columns: TableColumnList = [
     prop: "id"
   },
   {
-    label: "供应商ID",
-    prop: "supplier_id"
+    label: "代理商ID",
+    prop: "agent_id"
   },
   {
-    label: "供应商名称",
-    prop: "supplier_name"
+    label: "代理商名称",
+    prop: "agent_name"
   },
   {
     label: "操作",
@@ -45,8 +45,12 @@ const columns: TableColumnList = [
         return "余额加款";
       } else if (row.action === 1) {
         return "余额减款";
-      } else {
+      } else if (row.action === 2) {
         return "余额校正";
+      } else if (row.action === 3) {
+        return "授信加款";
+      } else {
+        return "授信减款";
       }
     }
   },
@@ -101,11 +105,11 @@ function handleCurrentChange(val: number) {
 
 async function onSearch() {
   var requestData = {
-    supplier_id: supplier_id.value,
+    agent_id: agent_id.value,
     currentPage: pagination.currentPage,
     pageSize: pagination.pageSize
   };
-  const { data } = await getSupplierFundLog(requestData);
+  const { data } = await getAgentFundLog(requestData);
   console.log(data);
   dataList.value = data.list;
   pagination.total = data.total;

@@ -73,6 +73,33 @@ defineExpose({ getRef });
         disabled
       />
     </el-form-item>
+    <el-form-item label="密钥" prop="secret_key">
+      <el-input
+        v-model="newFormInline.secret_key"
+        clearable
+        placeholder="请输入密钥"
+      />
+    </el-form-item>
+    <el-form-item label="通知地址" prop="notification_address">
+      <el-input
+        v-model="newFormInline.notification_address"
+        clearable
+        placeholder="请输入通知地址"
+      />
+    </el-form-item>
+    <el-form-item label="通知方式" prop="notification_method">
+      <el-select v-model="newFormInline.notification_method" clearable>
+        <el-option :key="0" label="可靠通知" :value="0" />
+        <el-option :key="1" label="广播通知" :value="1" />
+      </el-select>
+    </el-form-item>
+    <el-form-item label="客户" prop="customer">
+      <el-input
+        v-model="newFormInline.customer"
+        clearable
+        placeholder="请输入客户"
+      />
+    </el-form-item>
     <el-form-item label="备注" prop="remark">
       <el-input
         v-model="newFormInline.remark"
