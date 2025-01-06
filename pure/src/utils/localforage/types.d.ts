@@ -59,7 +59,7 @@ interface LocalForageDriverMethodsOptional {
 }
 
 // duplicating LocalForageDriverMethodsOptional to preserve TS v2.0 support,
-// since Partial<> isn't supported there
+// since Partial<span> isn't supported there
 interface LocalForageDbMethodsOptional {
   dropInstance: LocalForageDropInstanceFn;
 }

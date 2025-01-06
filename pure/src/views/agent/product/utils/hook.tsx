@@ -1,28 +1,46 @@
-import editForm from "../form.vue";
-import { getAgentSimpleList, getAgentProductList } from "@/api/agent";
+import newForm from "../form/newproduct.vue";
+import editForm from "../form/editproduct.vue";
+import batchForm from "../form/batchchangdiscount.vue";
+import {
+  getAgentSimpleList,
+  getAgentProductList,
+  addAgentProduct,
+  updateAgentProduct,
+  deleteAgentProduct,
+  batchUpdateAgentProduct,
+  batchUpdateAgentProductDiscount
+} from "@/api/agent";
 import {
   getProductCategoryList,
   getProductInformationIdAndName
 } from "@/api/product";
-import { SupplyStrategyList } from "@/api/constdata";
+import {
+  SupplyStrategyList,
+  BusinessTypeList,
+  OperatorListTelecom,
+  ProvinceList,
+  OperatorListAll
+} from "@/api/constdata";
 import { addDialog } from "@/components/ReDialog";
-import { reactive, ref, onMounted, h } from "vue";
+import { reactive, ref, onMounted, h, type Ref } from "vue";
 import type {
-  FormItemProps,
+  NewProductFormItemProps,
   SupplierSimpleItem,
+  AgentProcuctItem,
   CategoryProps,
   ProductBaseInfoArray
 } from "../utils/types";
-import { deviceDetection } from "@pureadmin/utils";
+import { deviceDetection, getKeyList } from "@pureadmin/utils";
 import type { PaginationProps } from "@pureadmin/table";
 import { useRoute } from "vue-router";
 
-export function useDept() {
+export function useDept(tableRef: Ref) {
   const form = reactive({
     //业务类型
     business_type: "",
     //供货商
     agent_id: "" as any,
+    agent_name: "" as any,
     //产品类别
     product_category: "",
     //产品ID
@@ -56,6 +74,7 @@ export function useDept() {
   const productCategoryList = ref([] as CategoryProps);
   const productBaseInfoList = ref([] as ProductBaseInfoArray);
   const formRef = ref();
+  const selectedNum = ref(0);
   const dataList = ref([]);
   const loading = ref(true);
   const route = useRoute();
@@ -69,49 +88,90 @@ export function useDept() {
     {
       label: "业务类型",
       prop: "business_type",
-      minWidth: 70
+      cellRenderer: ({ row }) => (
+        <span>
+          {
+            BusinessTypeList.find(item => item.value === row.business_type)
+              ?.label
+          }
+        </span>
+      )
     },
     {
       label: "编号",
-      prop: "id",
-      minWidth: 70
+      prop: "id"
     },
     {
       label: "代理商",
-      minWidth: 200,
+      minWidth: 150,
       prop: "agent_id",
-      cellRenderer: ({ row }) => <>{row.agent_id + "\n " + row.agent_name}</>
+      cellRenderer: ({ row }) => (
+        <span>
+          {row.agent_id}
+          <br />
+          {row.agent_name}
+        </span>
+      )
     },
     {
       label: "产品类别",
       prop: "product_category",
-      minWidth: 100
+      minWidth: 100,
+      cellRenderer: ({ row }) => (
+        <span>
+          {
+            productCategoryList.value.find(
+              item => item.id === row.product_category
+            )?.category_name
+          }
+        </span>
+      )
     },
     {
       label: "产品",
       prop: "product_id",
       cellRenderer: ({ row }) => (
-        <>
-          {row.product_id + "\n " + row.product_name + "\n " + row.base_price}
-        </>
+        <span>
+          {row.product_id}
+          <br />
+          {row.product_name}
+          <br />
+          {row.base_price}
+        </span>
       )
     },
     {
       label: "产品运营商",
       prop: "operator",
-      minWidth: 100
+      minWidth: 100,
+      cellRenderer: ({ row }) => (
+        <span>
+          {OperatorListTelecom.find(item => item.value === row.operator)?.label}
+        </span>
+      )
     },
     {
       label: "产品折扣价",
       prop: "discount",
       cellRenderer: ({ row }) => (
-        <>{row.discount + "\n" + row.discount * row.base_price}</>
+        <span>
+          {row.discount}
+          <br />
+          {(row.discount * row.base_price).toFixed(2)}
+        </span>
       )
     },
     {
       label: "供货策略",
       prop: "supply_strategy",
-      cellRenderer: ({ row }) => <>{SupplyStrategyList[row.supply_strategy]}</>
+      cellRenderer: ({ row }) => (
+        <span>
+          {
+            SupplyStrategyList.find(item => item.value === row.supply_strategy)
+              ?.label
+          }
+        </span>
+      )
     },
     {
       label: "超时时间(秒)",
@@ -121,53 +181,94 @@ export function useDept() {
       label: "超时不缓存",
       prop: "timeout_not_cache",
       cellRenderer: ({ row }) => (
-        <>{row.timeout_not_cache === 0 ? "启动" : "不启动"}</>
+        <span>{row.timeout_not_cache === 0 ? "启动" : "不启动"}</span>
       )
     },
     {
       label: "策略",
       prop: "auto_submit_backup",
       cellRenderer: ({ row }) => (
-        <>{row.timeout_not_cache === 0 ? "启动" : "不启动"}</>
+        <span>{row.timeout_not_cache === 0 ? "启动" : "不启动"}</span>
       )
     },
     {
       label: "支持缓存",
       prop: "support_cache",
       cellRenderer: ({ row }) => (
-        <>{row.support_cache === 0 ? "支持" : "不支持"}</>
+        <span>{row.support_cache === 0 ? "支持" : "不支持"}</span>
       )
     },
     {
       label: "转网检测",
       prop: "transfer_check",
       cellRenderer: ({ row }) => (
-        <>{row.transfer_check === 0 ? "不启用" : "启用"}</>
+        <span>{row.transfer_check === 0 ? "不启用" : "启用"}</span>
       )
     },
     {
       label: "空号检测",
       prop: "empty_check",
       cellRenderer: ({ row }) => (
-        <>{row.empty_check === 0 ? "不启用" : "启用"}</>
+        <span>{row.empty_check === 0 ? "不启用" : "启用"}</span>
       )
     },
     {
       label: "禁用地区",
-      prop: "disabled_area"
+      prop: "disabled_area",
+      cellRenderer: ({ row, props }) => (
+        <span>
+          {row.disabled_area
+            .split(",")
+            .filter(item => item)
+            .map((item: number) => (
+              <el-tag size={props.size} key={item}>
+                {ProvinceList.find(province => province.value == item)?.label}
+              </el-tag>
+            ))}
+        </span>
+      )
     },
     {
       label: "可用地区",
-      prop: "enabled_area"
+      prop: "enabled_area",
+      cellRenderer: ({ row, props }) => (
+        <span>
+          {row.enabled_area
+            .split(",")
+            .filter(item => item)
+            .map((item: number) => (
+              <el-tag size={props.size} key={item}>
+                {ProvinceList.find(province => province.value == item)?.label}
+              </el-tag>
+            ))}
+        </span>
+      )
     },
     {
       label: "限定运营商",
-      prop: "limit_operator"
+      prop: "limit_operator",
+      cellRenderer: ({ row, props }) => (
+        <span>
+          {row.limit_operator
+            .split(",")
+            .filter(item => item)
+            .map((item: number) => (
+              <el-tag size={props.size} key={item}>
+                {
+                  OperatorListAll.find(operator => operator.value == item)
+                    ?.label
+                }
+              </el-tag>
+            ))}
+        </span>
+      )
     },
     {
       label: "状态",
       prop: "status",
-      cellRenderer: ({ row }) => <>{row.status === 0 ? "启用" : "禁用"}</>
+      cellRenderer: ({ row }) => (
+        <span>{row.status === 0 ? "维护" : "上架"}</span>
+      )
     },
     {
       label: "备注",
@@ -177,13 +278,22 @@ export function useDept() {
     {
       label: "操作",
       fixed: "right",
-      width: 210,
+      width: 200,
       slot: "operation"
     }
   ];
 
+  /** 取消选择 */
+  function onSelectionCancel() {
+    selectedNum.value = 0;
+    // 用于多选表格，清空用户的选择
+    tableRef.value.getTableRef().clearSelection();
+  }
+  /** 当CheckBox选择项发生变化时会触发该事件 */
   function handleSelectionChange(val) {
-    console.log("handleSelectionChange", val);
+    selectedNum.value = val.length;
+    // 重置表格高度
+    tableRef.value.setAdaptive();
   }
 
   function resetForm(formEl) {
@@ -200,6 +310,7 @@ export function useDept() {
       ...form
     };
     const { data } = await getAgentProductList(params);
+    console.log("data", data);
     dataList.value = data.list;
     pagination.total = data.total;
     pagination.pageSize = data.pageSize;
@@ -209,15 +320,45 @@ export function useDept() {
     }, 500);
   }
 
-  function openDialog(title = "新增", row?: FormItemProps) {
+  function batchChangeDiscount() {
     addDialog({
-      title: `${title}部门`,
+      title: `修改产品`,
       props: {
         formInline: {
-          supplier_id: row?.supplier_id ?? 0
+          agent_id: form.agent_id
         }
       },
-      width: "40%",
+      width: "75%",
+      draggable: true,
+      fullscreen: deviceDetection(),
+      fullscreenIcon: true,
+      closeOnClickModal: false,
+      contentRenderer: () => h(batchForm, { formInline: null }),
+      beforeSure: async (done, { options }) => {
+        const curData = options.props.formInline as AgentProcuctItem;
+        function chores() {
+          done(); // 关闭弹框
+          onSearch(); // 刷新表格数据
+        }
+        console.log("curData", curData);
+        await batchUpdateAgentProductDiscount(curData);
+        chores();
+      }
+    });
+  }
+
+  function batchChangeProduct() {
+    const curSelected = tableRef.value.getTableRef().getSelectionRows();
+    var ids = getKeyList(curSelected, "id");
+    if (ids.length === 0) {
+      return;
+    }
+    addDialog({
+      title: `修改产品`,
+      props: {
+        formInline: {}
+      },
+      width: "75%",
       draggable: true,
       fullscreen: deviceDetection(),
       fullscreenIcon: true,
@@ -225,20 +366,24 @@ export function useDept() {
       contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
       beforeSure: (done, { options }) => {
         const FormRef = formRef.value.getRef();
-        const curData = options.props.formInline as FormItemProps;
+        const curData = options.props.formInline as AgentProcuctItem;
+        //如果curData的字段只有一个，说明没有填写任何信息，直接关闭弹框
+        if (Object.keys(curData).length === 1) {
+          done();
+          return;
+        }
+        // 将curData中的字段product_name删除
+        delete curData.product_name;
+        console.log("curData", curData);
         function chores() {
           done(); // 关闭弹框
           onSearch(); // 刷新表格数据
         }
-        FormRef.validate(valid => {
+        FormRef.validate(async (valid: boolean) => {
           if (valid) {
-            // 表单规则校验通过
-            if (title === "新增") {
-              // 实际开发先调用新增接口，再进行下面操作
-              console.log("新增", curData);
-            } else {
-              // 实际开发先调用修改接口，再进行下面操作
-            }
+            var data = { ...curData, ids };
+            console.log("data", data);
+            await batchUpdateAgentProduct(data);
             chores();
           }
         });
@@ -246,8 +391,105 @@ export function useDept() {
     });
   }
 
+  function changeProduct(row: AgentProcuctItem) {
+    var disabled_area = row.disabled_area as unknown as string;
+    var enabled_area = row.enabled_area as unknown as string;
+    var limit_operator = row.limit_operator as unknown as string;
+    addDialog({
+      title: `修改产品`,
+      props: {
+        formInline: {
+          ...row,
+          disabled_area: disabled_area.split(",").map(Number),
+          enabled_area: enabled_area.split(",").map(Number),
+          limit_operator: limit_operator.split(",").map(Number)
+        }
+      },
+      width: "75%",
+      draggable: true,
+      fullscreen: deviceDetection(),
+      fullscreenIcon: true,
+      closeOnClickModal: false,
+      contentRenderer: () => h(editForm, { ref: formRef, formInline: null }),
+      beforeSure: (done, { options }) => {
+        const FormRef = formRef.value.getRef();
+        const curData = options.props.formInline as AgentProcuctItem;
+        console.log("curData", curData);
+        function chores() {
+          done(); // 关闭弹框
+          onSearch(); // 刷新表格数据
+        }
+        FormRef.validate(async valid => {
+          if (valid) {
+            await updateAgentProduct(curData);
+            chores();
+          }
+        });
+      }
+    });
+  }
+
+  function newProcuct() {
+    addDialog({
+      title: `新增产品`,
+      props: {
+        formInline: {
+          agent_id: form.agent_id,
+          agent_name: form.agent_name,
+          product_list: []
+        }
+      },
+      width: "60%",
+      draggable: true,
+      fullscreen: deviceDetection(),
+      fullscreenIcon: true,
+      closeOnClickModal: false,
+      contentRenderer: () => h(newForm, { ref: formRef, formInline: null }),
+      beforeSure: (done, { options }) => {
+        const FormRef = formRef.value.getRef();
+        const curData = options.props.formInline as NewProductFormItemProps;
+        curData.product_list.forEach(item => {
+          item.enabled_area = String(item.scope).split(",").map(Number);
+          item.limit_operator = String(item.limit_operator)
+            .split(",")
+            .map(Number);
+        });
+        console.log("curData", curData);
+        function chores() {
+          done(); // 关闭弹框
+          onSearch(); // 刷新表格数据
+        }
+        FormRef.validate(async valid => {
+          if (valid) {
+            await addAgentProduct(curData);
+            chores();
+          }
+        });
+      }
+    });
+  }
+
+  async function handleBatchDelete() {
+    const curSelected = tableRef.value.getTableRef().getSelectionRows();
+    var ids = getKeyList(curSelected, "id");
+    await deleteAgentProduct(ids).then(() => {
+      onSearch();
+      tableRef.value.getTableRef().clearSelection();
+    });
+  }
+
+  async function handleDelete(row) {
+    var ids = [row.id];
+    await deleteAgentProduct(ids).then(() => {
+      onSearch();
+    });
+  }
+
   onMounted(async () => {
-    form.agent_id = Number(route.query.agent_id);
+    if (route.query.agent_id) {
+      form.agent_id = Number(route.query.agent_id);
+      form.agent_name = route.query.agent_name as string;
+    }
     onSearch();
     const response = await getAgentSimpleList();
     agentItemLists.value = response.data;
@@ -263,12 +505,20 @@ export function useDept() {
     loading,
     columns,
     dataList,
+    selectedNum,
+    pagination,
     agentItemLists,
     productCategoryList,
     productBaseInfoList,
     onSearch,
     resetForm,
-    openDialog,
-    handleSelectionChange
+    newProcuct,
+    changeProduct,
+    batchChangeProduct,
+    batchChangeDiscount,
+    handleDelete,
+    handleBatchDelete,
+    handleSelectionChange,
+    onSelectionCancel
   };
 }

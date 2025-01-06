@@ -54,25 +54,25 @@ const OperatorListPowerbill = [
 
 //业务类型列表
 const BusinessTypeList = [
-  { label: "话费", value: 1 },
-  { label: "权益", value: 2 },
-  { label: "卡券", value: 3 },
-  { label: "油卡", value: 4 },
-  { label: "流量", value: 5 },
-  { label: "电费", value: 6 }
+  { label: "话费", value: 0 },
+  { label: "权益", value: 1 },
+  { label: "卡券", value: 2 },
+  { label: "油卡", value: 3 },
+  { label: "流量", value: 4 },
+  { label: "电费", value: 5 }
 ];
 
 //单位列表
 const UnitList = [
-  { label: "元", value: 1 },
-  { label: "M", value: 2 },
-  { label: "月", value: 3 },
-  { label: "个", value: 4 },
-  { label: "周", value: 5 },
-  { label: "张", value: 6 },
-  { label: "半年", value: 7 },
-  { label: "季", value: 8 },
-  { label: "年", value: 9 }
+  { label: "元", value: 0 },
+  { label: "M", value: 1 },
+  { label: "月", value: 2 },
+  { label: "个", value: 3 },
+  { label: "周", value: 4 },
+  { label: "张", value: 5 },
+  { label: "半年", value: 6 },
+  { label: "季", value: 7 },
+  { label: "年", value: 8 }
 ];
 
 //全国省份列表

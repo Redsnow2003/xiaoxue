@@ -50,12 +50,24 @@ func IpLocation(ip string) string {
 		return "未知"
 	}
 	tmp := strings.Split(result, "|")
-	result = tmp[0]
+	if tmp[0] == "0" && tmp[2] == "0" && tmp[3] == "0" {
+		return "未知"
+	}
+	result = ""
+	if tmp[0] != "0" {
+		result = tmp[0]
+	}
 	if tmp[2] != "0" {
-		result = result + "-" + tmp[2]
+		if result != "" {
+			result += "-"
+		}
+		result += tmp[2]
 	}
 	if tmp[3] != "0" {
-		result = result + "-" + tmp[3]
+		if result != "" {
+			result += "-"
+		}
+		result += tmp[3]
 	}
 	return result
 }

@@ -1,6 +1,7 @@
 package module
 
 import (
+	"fmt"
 	"main/middleware"
 	"main/model"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-//注册代理商接口路由
+// 注册代理商接口路由
 func RegisterAgentRoutes(router *gin.Engine) {
 	router.POST("/agent-list", getAgentList)
 	router.POST("/agent", addAgent)
@@ -27,9 +28,206 @@ func RegisterAgentRoutes(router *gin.Engine) {
 	router.POST("/agent-ip-white-list", addAgentIpWhite)
 	router.DELETE("/agent-ip-white-list", deleteAgentIpWhite)
 	router.PUT("/agent-ip-white-list", updateAgentIpWhite)
+	router.POST("/get-agent-product-list", getAgentProductList)
+	router.POST("/agent-product", addAgentProduct)
+	router.PUT("/agent-product", updateAgentProduct)
+	router.DELETE("/agent-product", deleteAgentProduct)
+	router.PUT("/batch-update-agent-product",batchUpdateAgentProduct)
+	router.POST("/get-all-agent-product-list",getAllAgentProductList)
+	router.PUT("/batch-update-agent-product-discount",batchUpdateAgentProductDiscount)
 }
 
-//添加代理商白名单
+// 批量修改代理商产品折扣
+func batchUpdateAgentProductDiscount(c *gin.Context) {
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	product_list := requestData["product_list"].([]interface{})
+	db := model.Db
+	for _, v := range product_list {
+		id := uint64(v.(map[string]interface{})["id"].(float64))
+		discount := v.(map[string]interface{})["discount"].(float64)
+		db.Model(&model.Agent_product{}).Where("id = ?", id).Update("discount", discount)
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
+}
+
+// 获取所有代理商产品列表
+func getAllAgentProductList(c *gin.Context) {
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	agent_id := requestData["agent_id"].(float64)
+	db := model.Db
+	var result []model.Agent_product
+	db.Where("agent_id = ?",agent_id).Find(&result)
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "", "data": result})
+}
+
+// 批量修改代理商产品
+func batchUpdateAgentProduct(c *gin.Context) {
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	ids := requestData["ids"].([]interface{})
+	//删除ids字段
+	delete(requestData, "ids")
+	//假如包括disabled_area，enabled_area，limit_operator字段，需要转换为字符串
+	if _, ok := requestData["disabled_area"]; ok {
+		requestData["disabled_area"] = convertArrayToString(requestData["disabled_area"].([]interface{}))
+	}
+	if _, ok := requestData["enabled_area"]; ok {
+		requestData["enabled_area"] = convertArrayToString(requestData["enabled_area"].([]interface{}))
+	}
+	if _, ok := requestData["limit_operator"]; ok {
+		requestData["limit_operator"] = convertArrayToString(requestData["limit_operator"].([]interface{}))
+	}
+	db := model.Db
+	db.Model(&model.Agent_product{}).Where("id in ?", ids).Updates(requestData)
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
+}
+
+// 删除代理商产品
+func deleteAgentProduct(c *gin.Context) {
+	var ids []uint64
+	err := c.BindJSON(&ids)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	db := model.Db
+	db.Where("id in ?", ids).Delete(&model.Agent_product{})
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
+}
+
+// 更新代理商产品
+func updateAgentProduct(c *gin.Context) {
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	id := uint64(requestData["id"].(float64))
+	db := model.Db
+	var agentProduct model.Agent_product
+	res := db.Where("id = ?", id).First(&agentProduct)
+	if res.Error != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": res.Error.Error()})
+		return
+	}
+	agentProduct.Discount_type = uint8(requestData["discount_type"].(float64))
+	agentProduct.Discount = requestData["discount"].(float64)
+	agentProduct.Status = uint8(requestData["status"].(float64))
+	agentProduct.Supply_strategy = uint8(requestData["supply_strategy"].(float64))
+	agentProduct.Support_cache = uint8(requestData["support_cache"].(float64))
+	agentProduct.Transfer_check = uint8(requestData["transfer_check"].(float64))
+	agentProduct.Empty_check = uint8(requestData["empty_check"].(float64))
+	agentProduct.Timeout_not_cache = uint8(requestData["timeout_not_cache"].(float64))
+	agentProduct.Timeout = uint32(requestData["timeout"].(float64))
+	agentProduct.Backup_channel_strategy = uint8(requestData["backup_channel_strategy"].(float64))
+	agentProduct.Auto_submit_backup = uint8(requestData["auto_submit_backup"].(float64))
+	agentProduct.Disabled_area = convertArrayToString(requestData["disabled_area"].([]interface{}))
+	agentProduct.Enabled_area = convertArrayToString(requestData["enabled_area"].([]interface{}))
+	agentProduct.Limit_operator = convertArrayToString(requestData["limit_operator"].([]interface{}))
+	agentProduct.Remark = requestData["remark"].(string)
+	db.Save(&agentProduct)
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
+}
+
+func convertArrayToString(arr []interface{}) string {
+	str := ""
+	for _, v := range arr {
+		str += fmt.Sprintf("%d", uint8(v.(float64)))
+		str += ","
+	}
+	if len(str) > 0 {
+		str = str[:len(str)-1]
+	}
+	return str
+}
+
+// 增加代理商产品
+func addAgentProduct(c *gin.Context) {
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	agent_id := requestData["agent_id"].(float64)
+	agent_name := requestData["agent_name"].(string)
+	product_list := requestData["product_list"].([]interface{})
+	db := model.Db
+	for _, v := range product_list {
+		var agentProduct model.Agent_product
+		agentProduct.Agent_id = uint64(agent_id)
+		agentProduct.Agent_name = agent_name
+		agentProduct.Business_type = uint8(v.(map[string]interface{})["type"].(float64))
+		agentProduct.Product_id = uint64(v.(map[string]interface{})["id"].(float64))
+		agentProduct.Product_name = v.(map[string]interface{})["name"].(string)
+		agentProduct.Product_category = uint8(v.(map[string]interface{})["category"].(float64))
+		agentProduct.Operator = uint8(v.(map[string]interface{})["operator"].(float64))
+		agentProduct.Base_price = v.(map[string]interface{})["base_price"].(float64)
+		agentProduct.Supply_strategy = 0
+		agentProduct.Backup_channel_strategy = 0
+		agentProduct.Discount_type = 0
+		agentProduct.Discount = v.(map[string]interface{})["discount"].(float64)
+		agentProduct.Timeout = 300
+		agentProduct.Timeout_not_cache = 0
+		agentProduct.Auto_submit_backup = 0
+		agentProduct.Interal_time = 300
+		agentProduct.Support_cache = 0
+		agentProduct.Transfer_check = 0
+		agentProduct.Empty_check = 0
+		agentProduct.Disabled_area = v.(map[string]interface{})["disabled_area"].(string)
+		agentProduct.Enabled_area = v.(map[string]interface{})["enabled_area"].(string)
+		agentProduct.Limit_operator = v.(map[string]interface{})["limit_operator"].(string)
+		agentProduct.Status = 0
+		db.Create(&agentProduct)
+	}
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
+}
+
+// 获取代理商产品列表
+func getAgentProductList(c *gin.Context) {
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	agent_id := requestData["agent_id"].(float64)
+	page := requestData["currentPage"].(float64)
+	pageSize := requestData["pageSize"].(float64)
+	db := model.Db
+	offset := (page - 1) * pageSize
+	var total int64
+	var result []model.Agent_product
+	db.Model(&model.Agent_product{}).Where("agent_id = ?", agent_id).Count(&total)
+	db.Offset(int(offset)).Where("agent_id = ?", agent_id).Limit(int(pageSize)).Find(&result)
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data": gin.H{
+			"list":        result,
+			"total":       total,
+			"currentPage": page,
+			"pageSize":    pageSize,
+		},
+	})
+}
+
+// 添加代理商白名单
 func addAgentIpWhite(c *gin.Context) {
 	var agentIpWhite model.Agent_whitelist
 	err := c.ShouldBindJSON(&agentIpWhite)
@@ -43,7 +241,7 @@ func addAgentIpWhite(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
 }
 
-//删除代理商白名单
+// 删除代理商白名单
 func deleteAgentIpWhite(c *gin.Context) {
 	var ids []float64
 	err := c.BindJSON(&ids)
@@ -56,7 +254,7 @@ func deleteAgentIpWhite(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
 }
 
-//更新代理商白名单
+// 更新代理商白名单
 func updateAgentIpWhite(c *gin.Context) {
 	var agentIpWhite model.Agent_whitelist
 	err := c.ShouldBindJSON(&agentIpWhite)
@@ -70,7 +268,7 @@ func updateAgentIpWhite(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
 }
 
-//获取代理商白名单列表
+// 获取代理商白名单列表
 func getAgentIpWhiteList(c *gin.Context) {
 	var requestData map[string]interface{}
 	err := c.ShouldBindJSON(&requestData)
@@ -107,7 +305,7 @@ func getAgentIpWhiteList(c *gin.Context) {
 	})
 }
 
-//获取代理商余额快照
+// 获取代理商余额快照
 func getAgentBalanceSnapshot(c *gin.Context) {
 	var requestData map[string]interface{}
 	err := c.ShouldBindJSON(&requestData)
@@ -136,7 +334,7 @@ func getAgentBalanceSnapshot(c *gin.Context) {
 	})
 }
 
-//获取代理商白名单
+// 获取代理商白名单
 func getAgentWhitelist(c *gin.Context) {
 	var requestData map[string]interface{}
 	err := c.ShouldBindJSON(&requestData)
@@ -165,7 +363,7 @@ func getAgentWhitelist(c *gin.Context) {
 	})
 }
 
-//获取代理商资金操作日志
+// 获取代理商资金操作日志
 func getAgentFundLog(c *gin.Context) {
 	var requestData map[string]interface{}
 	err := c.ShouldBindJSON(&requestData)
@@ -194,15 +392,15 @@ func getAgentFundLog(c *gin.Context) {
 	})
 }
 
-//获取代理商简单列表
+// 获取代理商简单列表
 func getAgentSimpleList(c *gin.Context) {
 	db := model.Db
 	var result []map[string]interface{}
-	db.Select("id","name").Model(&model.Agent_account{}).Find(&result)
+	db.Select("id", "name").Model(&model.Agent_account{}).Find(&result)
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "", "data": result})
 }
 
-//操作代理商资金
+// 操作代理商资金
 func changeAgentFund(c *gin.Context) {
 	var requestData map[string]interface{}
 	err := c.ShouldBindJSON(&requestData)
@@ -229,17 +427,17 @@ func changeAgentFund(c *gin.Context) {
 	action := 0
 	if fund_action == "subtract" || fund_action == "adjust" || fund_action == "add" {
 		beforeAmount = agent.Fund_balance
-	if fund_action == "add" {
-		agent.Fund_balance += amount
-		action = 0
-	} else if fund_action == "subtract" {
-		agent.Fund_balance -= amount
-		action = 1
-	} else if fund_action == "adjust" {
-		agent.Fund_balance = amount
-		action = 2
-	}
-	afterAmount = agent.Fund_balance
+		if fund_action == "add" {
+			agent.Fund_balance += amount
+			action = 0
+		} else if fund_action == "subtract" {
+			agent.Fund_balance -= amount
+			action = 1
+		} else if fund_action == "adjust" {
+			agent.Fund_balance = amount
+			action = 2
+		}
+		afterAmount = agent.Fund_balance
 	} else {
 		beforeAmount = agent.Credit_balance
 		if fund_action == "credit_add" {
@@ -256,7 +454,7 @@ func changeAgentFund(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"success": false, "message": res.Error.Error()})
 		return
 	}
-	
+
 	// 添加资金变动记录
 	var fundLog model.Agent_fund_log
 	fundLog.Agent_id = uint64(agent_id)
@@ -276,7 +474,7 @@ func changeAgentFund(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": "代理商资金变动成功"})
 }
 
-//批量修改代理商状态
+// 批量修改代理商状态
 func batchUpdateAgentStatus(c *gin.Context) {
 	var requestData map[string]interface{}
 	err := c.ShouldBindJSON(&requestData)
@@ -291,7 +489,7 @@ func batchUpdateAgentStatus(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
 }
 
-//删除代理商
+// 删除代理商
 func deleteAgent(c *gin.Context) {
 	var ids []float64
 	err := c.BindJSON(&ids)
@@ -304,7 +502,7 @@ func deleteAgent(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
 }
 
-//更新代理商
+// 更新代理商
 func updateAgent(c *gin.Context) {
 	var agent model.Agent_account
 	err := c.ShouldBindJSON(&agent)
@@ -317,7 +515,7 @@ func updateAgent(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
 }
 
-//添加代理商
+// 添加代理商
 func addAgent(c *gin.Context) {
 	var agent model.Agent_account
 	err := c.ShouldBindJSON(&agent)
@@ -333,7 +531,7 @@ func addAgent(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
 }
 
-//获取代理商列表
+// 获取代理商列表
 func getAgentList(c *gin.Context) {
 	var requestData map[string]interface{}
 	err := c.ShouldBindJSON(&requestData)

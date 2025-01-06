@@ -41,28 +41,28 @@ export function useCategory() {
       label: "需要商品编码",
       prop: "is_need_product_id",
       cellRenderer: ({ row }) => (
-        <>{row.is_need_product_id === 1 ? "是" : "否"}</>
+        <span>{row.is_need_product_id === 1 ? "是" : "否"}</span>
       )
     },
     {
       label: "需要绑定回调地址",
       prop: "is_bind_callback_address",
       cellRenderer: ({ row }) => (
-        <>{row.is_bind_callback_address === 1 ? "是" : "否"}</>
+        <span>{row.is_bind_callback_address === 1 ? "是" : "否"}</span>
       )
     },
     {
       label: "支持处理供货金额不一致",
       prop: "is_support_inconsistent",
       cellRenderer: ({ row }) => (
-        <>{row.is_support_inconsistent === 1 ? "是" : "否"}</>
+        <span>{row.is_support_inconsistent === 1 ? "是" : "否"}</span>
       )
     },
     {
       label: "是否支持撤单",
       prop: "is_support_cancel",
       cellRenderer: ({ row }) => (
-        <>{row.is_support_cancel === 1 ? "是" : "否"}</>
+        <span>{row.is_support_cancel === 1 ? "是" : "否"}</span>
       )
     },
     {

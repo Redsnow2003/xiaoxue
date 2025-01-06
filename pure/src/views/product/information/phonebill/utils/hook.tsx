@@ -68,28 +68,30 @@ export function useCategory(tableRef: Ref) {
       label: "产品类别",
       prop: "category",
       cellRenderer: ({ row }) => (
-        <>
+        <span>
           {
             productCategoryList.value.find(item => item.id == row.category)
               ?.category_name
           }
-        </>
+        </span>
       )
     },
     {
       label: "产品运营商",
       prop: "operator",
       cellRenderer: ({ row }) => (
-        <>
+        <span>
           {OperatorListTelecom.find(item => item.value == row.operator)?.label}
-        </>
+        </span>
       )
     },
     {
       label: "使用范围",
       prop: "scope",
       cellRenderer: ({ row }) => (
-        <>{ProvinceList.find(province => province.value == row.scope)?.label}</>
+        <span>
+          {ProvinceList.find(province => province.value == row.scope)?.label}
+        </span>
       )
     },
     {
@@ -100,7 +102,7 @@ export function useCategory(tableRef: Ref) {
       label: "单位",
       prop: "unit",
       cellRenderer: ({ row }) => (
-        <>{UnitList.find(unit => unit.value == row.unit)?.label}</>
+        <span>{UnitList.find(unit => unit.value == row.unit)?.label}</span>
       )
     },
     {
@@ -112,7 +114,7 @@ export function useCategory(tableRef: Ref) {
       prop: "disableArea",
       minWidth: 100,
       cellRenderer: ({ row, props }) => (
-        <>
+        <span>
           {row.disable_area
             .split(",")
             .filter(item => item)
@@ -121,20 +123,20 @@ export function useCategory(tableRef: Ref) {
                 {ProvinceList.find(province => province.value == item)?.label}
               </el-tag>
             ))}
-        </>
+        </span>
       )
     },
     {
       label: "限定运营商",
       prop: "limit_operator",
       cellRenderer: ({ row }) => (
-        <>
+        <span>
           {
             OperatorListTelecom2.find(
               province => province.value == row.limit_operator
             )?.label
           }
-        </>
+        </span>
       )
     },
     {

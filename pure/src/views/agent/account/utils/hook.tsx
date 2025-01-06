@@ -81,20 +81,20 @@ export function useCategory(tableRef: Ref) {
       label: "通知方式",
       prop: "notification_method",
       cellRenderer: ({ row }) => (
-        <>{row.notification_method === 0 ? "可靠通知" : "广播通知"}</>
+        <span>{row.notification_method === 0 ? "可靠通知" : "广播通知"}</span>
       )
     },
     {
       label: "状态",
       prop: "status",
       cellRenderer: ({ row }) => (
-        <>
+        <span>
           {row.status === 0 ? (
             <div style="color:red">维护</div>
           ) : (
             <div style="color:green">上架</div>
           )}
-        </>
+        </span>
       )
     },
     {

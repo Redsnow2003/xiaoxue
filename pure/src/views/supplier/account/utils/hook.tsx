@@ -77,13 +77,13 @@ export function useCategory(tableRef: Ref) {
       label: "上游模板配置",
       prop: "up_template",
       cellRenderer: ({ row }) => (
-        <>
+        <span>
           {
             <el-button type="text" onClick={() => handleConfigTemplate(row)}>
               {row.up_template}
             </el-button>
           }
-        </>
+        </span>
       )
     },
     {
@@ -93,7 +93,9 @@ export function useCategory(tableRef: Ref) {
     {
       label: "状态",
       prop: "status",
-      cellRenderer: ({ row }) => <>{row.status === 0 ? "维护" : "上架"}</>
+      cellRenderer: ({ row }) => (
+        <span>{row.status === 0 ? "维护" : "上架"}</span>
+      )
     },
     {
       label: "状态信息",

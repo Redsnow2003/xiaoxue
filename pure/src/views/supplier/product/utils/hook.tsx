@@ -64,7 +64,7 @@ export function useDept() {
       minWidth: 200,
       prop: "supplier_id",
       cellRenderer: ({ row }) => (
-        <>{row.supplier_id + "\n " + row.supplier_name}</>
+        <span>{row.supplier_id + "\n " + row.supplier_name}</span>
       )
     },
     {
@@ -76,7 +76,7 @@ export function useDept() {
       label: "产品",
       prop: "product_id",
       cellRenderer: ({ row }) => (
-        <>{row.product_id + "\n " + row.product_name}</>
+        <span>{row.product_id + "\n " + row.product_name}</span>
       )
     },
     {
@@ -88,7 +88,7 @@ export function useDept() {
       label: "折扣类型",
       prop: "discount_type",
       cellRenderer: ({ row }) => (
-        <>{row.discount_type === 0 ? "按折扣" : "按金额"}</>
+        <span>{row.discount_type === 0 ? "按折扣" : "按金额"}</span>
       )
     },
     {
@@ -100,11 +100,11 @@ export function useDept() {
       label: "供货价",
       prop: "discount",
       cellRenderer: ({ row }) => (
-        <>
+        <span>
           {row.discount_type === 0
             ? row.discount * row.base_price
             : row.discount}
-        </>
+        </span>
       )
     },
     {
@@ -125,7 +125,9 @@ export function useDept() {
     {
       label: "状态",
       prop: "status",
-      cellRenderer: ({ row }) => <>{row.status === 0 ? "维护" : "上架"}</>
+      cellRenderer: ({ row }) => (
+        <span>{row.status === 0 ? "维护" : "上架"}</span>
+      )
     },
     {
       label: "备注",

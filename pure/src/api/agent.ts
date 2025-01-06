@@ -97,3 +97,57 @@ export const getAgentProductList = (data: object) => {
     }
   );
 };
+
+/** 代理商管理-获取所有代理商产品 */
+export const getAllAgentProductList = (data: object) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi("/get-all-agent-product-list"),
+    {
+      data
+    }
+  );
+};
+
+/** 代理商管理-添加代理商产品 */
+export const addAgentProduct = (data: object) => {
+  return http.request<Result>("post", baseUrlApi("/agent-product"), {
+    data
+  });
+};
+
+/** 代理商管理-修改代理商产品 */
+export const updateAgentProduct = (data: object) => {
+  return http.request<Result>("put", baseUrlApi("/agent-product"), {
+    data
+  });
+};
+
+/** 代理商管理-删除代理商产品 */
+export const deleteAgentProduct = (data: object) => {
+  return http.request<Result>("delete", baseUrlApi("/agent-product"), {
+    data
+  });
+};
+
+/** 代理商管理-批量修改代理商产品 */
+export const batchUpdateAgentProduct = (data: object) => {
+  return http.request<Result>(
+    "put",
+    baseUrlApi("/batch-update-agent-product"),
+    {
+      data
+    }
+  );
+};
+
+/** 代理商管理-批量修改代理商产品折扣 */
+export const batchUpdateAgentProductDiscount = (data: object) => {
+  return http.request<Result>(
+    "put",
+    baseUrlApi("/batch-update-agent-product-discount"),
+    {
+      data
+    }
+  );
+};
