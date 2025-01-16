@@ -35,6 +35,80 @@ func RegisterAgentRoutes(router *gin.Engine) {
 	router.PUT("/batch-update-agent-product",batchUpdateAgentProduct)
 	router.POST("/get-all-agent-product-list",getAllAgentProductList)
 	router.PUT("/batch-update-agent-product-discount",batchUpdateAgentProductDiscount)
+	router.POST("/get-agent-channel-list",getAgentChannelList)
+	router.POST("/agent-channel",addAgentChannel)
+	router.DELETE("/agent-channel",deleteAgentChannel)
+}
+
+// 添加代理商渠道
+func addAgentChannel(c *gin.Context) {
+	var agentChannel model.Agent_channel
+	err := c.ShouldBindJSON(&agentChannel)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	db := model.Db
+	db.Create(&agentChannel)
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
+}
+
+// 删除代理商渠道
+func deleteAgentChannel(c *gin.Context) {
+	var ids []uint64
+	err := c.BindJSON(&ids)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	db := model.Db
+	db.Where("id in ?", ids).Delete(&model.Agent_channel{})
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
+}
+
+// 获取代理商渠道列表
+func getAgentChannelList(c *gin.Context) {
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	db := model.Db
+	agent_id := requestData["agent_id"]
+	switch agent_id.(type) {
+	case float64:
+		db = db.Where("agent_id = ?", agent_id)
+	}
+	supplier_id := requestData["supplier_id"]
+	switch supplier_id.(type) {
+	case float64:
+		db = db.Where("supplier_id = ?", supplier_id)
+	}
+	supplier_name := requestData["supplier_name"]
+	if supplier_name != nil {
+		supplier_name2 := supplier_name.(string)
+		if supplier_name2 != "" {
+			db = db.Where("supplier_name like ?", "%"+supplier_name2+"%")
+		}
+	}
+	page := requestData["currentPage"].(float64)
+	pageSize := requestData["pageSize"].(float64)
+	
+	offset := (page - 1) * pageSize
+	var total int64
+	var result []model.Agent_channel
+	db.Model(&model.Agent_channel{}).Count(&total)
+	db.Offset(int(offset)).Limit(int(pageSize)).Find(&result)
+	c.JSON(http.StatusOK, gin.H{
+		"success": true, 
+		"message": "", 
+		"data": gin.H{
+			"list":        result,
+			"total":       total,
+			"currentPage": page,
+			"pageSize":    pageSize,
+		}})
 }
 
 // 批量修改代理商产品折扣

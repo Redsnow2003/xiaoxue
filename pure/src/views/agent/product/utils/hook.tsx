@@ -32,7 +32,7 @@ import type {
 } from "../utils/types";
 import { deviceDetection, getKeyList } from "@pureadmin/utils";
 import type { PaginationProps } from "@pureadmin/table";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 export function useDept(tableRef: Ref) {
   const form = reactive({
@@ -278,7 +278,7 @@ export function useDept(tableRef: Ref) {
     {
       label: "操作",
       fixed: "right",
-      width: 200,
+      width: 250,
       slot: "operation"
     }
   ];
@@ -469,6 +469,10 @@ export function useDept(tableRef: Ref) {
     });
   }
 
+  function handleProductChannel(row: AgentProcuctItem) {
+    console.log("row", row);
+  }
+
   async function handleBatchDelete() {
     const curSelected = tableRef.value.getTableRef().getSelectionRows();
     var ids = getKeyList(curSelected, "id");
@@ -519,6 +523,29 @@ export function useDept(tableRef: Ref) {
     handleDelete,
     handleBatchDelete,
     handleSelectionChange,
+    handleProductChannel,
     onSelectionCancel
   };
 }
+
+function useProductHandlers() {
+  const router = useRouter();
+  function handleProductChannel(row?: AgentProcuctItem) {
+    console.log("handleWhitelist", row);
+    if (row && row.id) {
+      // 携带参数 row.id 跳转到白名单配置页面
+      router.push({
+        path: "/agent/channel/index",
+        query: {
+          agent_id: row.agent_id,
+          agent_name: row.agent_name
+        }
+      });
+    } else {
+      console.error("Row or Row ID is missing");
+    }
+  }
+
+  return { handleProductChannel };
+}
+export { useProductHandlers };

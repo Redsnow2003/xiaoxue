@@ -346,10 +346,6 @@ export function useCategory(tableRef: Ref) {
     console.log("handleCheckAccount", row);
   }
 
-  function handleSales(row?: FormItemProps) {
-    console.log("handleSales", row);
-  }
-
   function handleChangeFundLog(row?: FormItemProps) {
     addDialog({
       title: `资金操作记录`,
@@ -477,7 +473,6 @@ export function useCategory(tableRef: Ref) {
     handleUpdateBalance,
     handleDirectOrder,
     handleCheckAccount,
-    handleSales,
     handleCreateAccount,
     onSearch,
     resetForm,
@@ -525,6 +520,43 @@ function useProductHandlers() {
     }
   }
 
-  return { handleWhitelist, handleProductConfig };
+  function handleAgentChannel(row?: FormItemProps) {
+    console.log("handleAgentChannel", row);
+    if (row && row.id) {
+      // 携带参数 row.id 跳转到产品配置页面
+      router.push({
+        path: "/agent/channel/index",
+        query: {
+          agent_id: row.id,
+          agent_name: row.name
+        }
+      });
+    } else {
+      console.error("Row or Row ID is missing");
+    }
+  }
+
+  function handleAgentProductChannel(row?: FormItemProps) {
+    console.log("handleAgentChannel", row);
+    if (row && row.id) {
+      // 携带参数 row.id 跳转到产品配置页面
+      router.push({
+        path: "/agent/productchannel/index",
+        query: {
+          agent_id: row.id,
+          agent_name: row.name
+        }
+      });
+    } else {
+      console.error("Row or Row ID is missing");
+    }
+  }
+
+  return {
+    handleWhitelist,
+    handleProductConfig,
+    handleAgentChannel,
+    handleAgentProductChannel
+  };
 }
 export { useProductHandlers };

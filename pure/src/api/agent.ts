@@ -151,3 +151,28 @@ export const batchUpdateAgentProductDiscount = (data: object) => {
     }
   );
 };
+
+/** 代理商管理-获取代理商通道 */
+export const getAgentChannelList = (data: object) => {
+  return http.request<ResultTable>(
+    "post",
+    baseUrlApi("/get-agent-channel-list"),
+    {
+      data
+    }
+  );
+};
+
+/** 代理商管理-添加代理商通道 */
+export const addAgentChannel = (data: object) => {
+  return http.request<Result>("post", baseUrlApi("/agent-channel"), {
+    data
+  });
+};
+
+/** 代理商管理-删除代理商通道 */
+export const deleteAgentChannel = (data: object) => {
+  return http.request<Result>("delete", baseUrlApi("/agent-channel"), {
+    data
+  });
+};

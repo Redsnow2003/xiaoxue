@@ -3,15 +3,14 @@ import { useCategory } from "./utils/hook";
 import { ref, computed, nextTick, onMounted } from "vue";
 import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
+import { BusinessTypeList, OperatorListAll } from "@/api/constdata";
 import { delay, deviceDetection, useResizeObserver } from "@pureadmin/utils";
-import { useProductHandlers } from "./utils/hook";
+import Refresh from "@iconify-icons/ep/refresh";
 import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
-import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
-import More2Fill from "@iconify-icons/ri/more-2-fill";
 defineOptions({
-  name: "AgentAccount"
+  name: "AgentProductChannel"
 });
 
 const iconClass = computed(() => {
@@ -34,37 +33,29 @@ const iconClass = computed(() => {
 const formRef = ref();
 const tableRef = ref();
 const contentRef = ref();
-const {
-  handleWhitelist,
-  handleProductConfig,
-  handleAgentChannel,
-  handleAgentProductChannel
-} = useProductHandlers();
+
 const {
   form,
+  curRow,
+  disabled,
+  selectedNum,
   loading,
   columns,
   rowStyle,
   dataList,
   pagination,
-  selectedNum,
-  handleBatchChange,
-  handleBatchUpdate,
-  handleUpdataInfo,
-  handleChangeFund,
-  handleChangeFundLog,
-  handleDirectOrder,
-  handleCheckAccount,
-  handleCreateAccount,
+  agentItemLists,
+  supplierItemLists,
+  productCategoryList,
+  productBaseInfoList,
   onSearch,
   resetForm,
-  handleAdd,
-  handleDelete,
+  openDialog,
   handleSizeChange,
-  onSelectionCancel,
+  handleDelete,
   handleCurrentChange,
   handleSelectionChange,
-  agentItemLists
+  onSelectionCancel
 } = useCategory(tableRef);
 
 onMounted(async () => {
@@ -85,12 +76,81 @@ onMounted(async () => {
       :model="form"
       class="search-form bg-bg_color w-[99/100] pl-8 pt-[12px] overflow-auto"
     >
-      <el-form-item label="代理商" prop="id">
+      <el-form-item label="业务类型" prop="business_type">
         <el-select
-          v-model="form.id"
+          v-model="form.business_type"
+          placeholder="请选择业务类型"
+          clearable
+          class="!w-[180px]"
+        >
+          <el-option
+            v-for="item in BusinessTypeList"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="产品" prop="product_id">
+        <el-select
+          v-model="form.product_id"
+          placeholder="请选择产品"
+          clearable
+          class="!w-[180px]"
+        >
+          <el-option
+            v-for="item in productBaseInfoList"
+            :key="item.id"
+            :label="item.id + ' ' + item.name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="产品类别" prop="product_category">
+        <el-select
+          v-model="form.product_category"
+          placeholder="请选择产品类别"
+          clearable
+          class="!w-[180px]"
+        >
+          <el-option
+            v-for="item in productCategoryList"
+            :key="item.id"
+            :label="item.category_name"
+            :value="item.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="产品运营商" prop="operator">
+        <el-select
+          v-model="form.operator"
+          placeholder="请选择产品运营商"
+          clearable
+          class="!w-[180px]"
+        >
+          <el-option
+            v-for="item in OperatorListAll"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="代理商产品ID" prop="agent_product_id">
+        <el-input
+          v-model="form.agent_product_id"
+          placeholder="请输入产品ID"
+          clearable
+          class="!w-[180px]"
+        />
+      </el-form-item>
+      <el-form-item label="代理商" prop="agent_id">
+        <el-select
+          v-model="form.agent_id"
           placeholder="请选择代理商"
           clearable
           class="!w-[180px]"
+          :disabled="disabled"
         >
           <el-option
             v-for="item in agentItemLists"
@@ -100,26 +160,46 @@ onMounted(async () => {
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="通知方式" prop="notification_method">
+      <el-form-item label="供货商产品ID" prop="supplier_product_id">
+        <el-input
+          v-model="form.supplier_product_id"
+          placeholder="请输入产品ID"
+          clearable
+          class="!w-[180px]"
+        />
+      </el-form-item>
+      <el-form-item label="供货商" prop="supplier_id">
         <el-select
-          v-model="form.notification_method"
-          placeholder="请选择通知方式"
+          v-model="form.supplier_id"
+          placeholder="请选择供货商"
           clearable
           class="!w-[180px]"
         >
-          <el-option :key="1" label="可靠通知" :value="0" />
-          <el-option :key="1" label="广播通知" :value="1" />
+          <el-option
+            v-for="item in supplierItemLists"
+            :key="item.id"
+            :label="item.id + ' ' + item.name"
+            :value="item.id"
+          />
         </el-select>
       </el-form-item>
-      <el-form-item label="状态" prop="status">
+      <el-form-item label="上游产品ID" prop="up_product_id">
+        <el-input
+          v-model="form.up_product_id"
+          placeholder="请输入产品ID"
+          clearable
+          class="!w-[180px]"
+        />
+      </el-form-item>
+      <el-form-item label="状态：" prop="status">
         <el-select
           v-model="form.status"
           placeholder="请选择状态"
           clearable
           class="!w-[180px]"
         >
-          <el-option :key="1" label="维护" :value="0" />
-          <el-option :key="1" label="上架" :value="1" />
+          <el-option label="维护" :value="0" />
+          <el-option label="上架" :value="1" />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -152,17 +232,9 @@ onMounted(async () => {
           <el-button
             type="primary"
             :icon="useRenderIcon(AddFill)"
-            @click="handleAdd()"
+            @click="openDialog()"
           >
-            新增代理商
-          </el-button>
-          <el-button
-            type="primary"
-            :icon="useRenderIcon(AddFill)"
-            :disabled="selectedNum === 0"
-            @click="handleBatchChange()"
-          >
-            批量修改状态
+            新增
           </el-button>
         </template>
         <template v-slot="{ size, dynamicColumns }">
@@ -206,91 +278,22 @@ onMounted(async () => {
             @page-current-change="handleCurrentChange"
           >
             <template #operation="{ row }">
-              <el-dropdown trigger="click">
-                <IconifyIconOffline :icon="More2Fill" class="text-[24px]" />
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item
-                      :icon="useRenderIcon(EditPen)"
-                      @click="handleUpdataInfo(row)"
-                    >
-                      修改
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      :icon="useRenderIcon(EditPen)"
-                      @click="handleDelete(row)"
-                    >
-                      删除
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      :icon="useRenderIcon(EditPen)"
-                      @click="handleChangeFund(row)"
-                    >
-                      资金操作
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      :icon="useRenderIcon(EditPen)"
-                      @click="handleChangeFundLog(row)"
-                    >
-                      资金操作日志
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      :icon="useRenderIcon(EditPen)"
-                      @click="handleWhitelist(row)"
-                    >
-                      白名单
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      :icon="useRenderIcon(EditPen)"
-                      @click="handleProductConfig(row)"
-                    >
-                      产品配置
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      :icon="useRenderIcon(EditPen)"
-                      @click="handleAgentChannel(row)"
-                    >
-                      通道配置
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      :icon="useRenderIcon(EditPen)"
-                      @click="handleAgentProductChannel(row)"
-                    >
-                      供货通道
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      :icon="useRenderIcon(EditPen)"
-                      @click="handleCheckAccount(row)"
-                    >
-                      资金流水
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      :icon="useRenderIcon(EditPen)"
-                      @click="handleDirectOrder(row)"
-                    >
-                      直充订单
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      :icon="useRenderIcon(EditPen)"
-                      @click="handleDirectOrder(row)"
-                    >
-                      更新缓存金额
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      :icon="useRenderIcon(EditPen)"
-                      @click="handleDirectOrder(row)"
-                    >
-                      更换密钥
-                    </el-dropdown-item>
-                    <el-dropdown-item
-                      :icon="useRenderIcon(EditPen)"
-                      @click="handleDirectOrder(row)"
-                    >
-                      开户信息
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
+              <el-popconfirm
+                :title="`是否确认删除${row.ip}`"
+                @confirm="handleDelete(row)"
+              >
+                <template #reference>
+                  <el-button
+                    class="reset-margin"
+                    link
+                    type="primary"
+                    :size="size"
+                    :icon="useRenderIcon(Delete)"
+                  >
+                    删除
+                  </el-button>
                 </template>
-              </el-dropdown>
+              </el-popconfirm>
             </template>
           </pure-table>
         </template>

@@ -5,6 +5,7 @@ import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { BusinessTypeList, OperatorListAll } from "@/api/constdata";
 import { delay, deviceDetection, useResizeObserver } from "@pureadmin/utils";
+import { useProductHandlers } from "./utils/hook";
 import Delete from "@iconify-icons/ep/delete";
 import EditPen from "@iconify-icons/ep/edit-pen";
 import Refresh from "@iconify-icons/ep/refresh";
@@ -16,6 +17,7 @@ defineOptions({
 
 const formRef = ref();
 const tableRef = ref();
+const { handleProductChannel } = useProductHandlers();
 const {
   form,
   loading,
@@ -310,6 +312,16 @@ function onFullscreen() {
               @click="handleDelete(row)"
             >
               删除
+            </el-button>
+            <el-button
+              class="reset-margin"
+              link
+              type="primary"
+              :size="size"
+              :icon="useRenderIcon(Delete)"
+              @click="handleProductChannel(row)"
+            >
+              供货通道
             </el-button>
           </template>
         </pure-table>

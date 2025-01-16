@@ -10,6 +10,15 @@
             "name": "Launch Program",
             "mode": "auto",
             "program": "${workspaceFolder}/main.go",
+            "cwd": "${workspaceFolder}",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "type": "go",
+            "request": "launch",
+            "name": "Launch Program",
+            "mode": "auto",
+            "program": "${workspaceFolder}/main.go",
             "internalConsoleOptions": "neverOpen"
         }
     ]
