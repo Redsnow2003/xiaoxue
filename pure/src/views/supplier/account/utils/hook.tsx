@@ -7,7 +7,8 @@ import templateForm from "../form/template.vue";
 import fundLogForm from "../form/fundlog.vue";
 import { message } from "@/utils/message";
 import { addDialog } from "@/components/ReDialog";
-import type { FormItemProps, SupplierSimpleItem } from "../utils/types";
+import type { FormItemProps } from "../utils/types";
+import type { SupplierIdName } from "@/api/types";
 import type { PaginationProps } from "@pureadmin/table";
 import { deviceDetection, getKeyList } from "@pureadmin/utils";
 import {
@@ -38,7 +39,7 @@ export function useCategory(tableRef: Ref) {
   const dataList = ref([]);
   const selectedNum = ref(0);
   const loading = ref(true);
-  const supplierItemLists = ref([] as SupplierSimpleItem[]);
+  const supplierItemLists = ref([] as SupplierIdName[]);
   const templateNameLists = ref([]);
   const pagination = reactive<PaginationProps>({
     total: 0,

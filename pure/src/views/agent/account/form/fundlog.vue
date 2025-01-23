@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref, reactive } from "vue";
+import { onMounted, ref, reactive, h } from "vue";
 import type { PaginationProps } from "@pureadmin/table";
 import { getAgentFundLog } from "@/api/agent";
+import { FundOperationTypeList2 } from "@/api/constdata";
 const props = defineProps({
   agent_id: {
     type: Number,
@@ -41,17 +42,10 @@ const columns: TableColumnList = [
     label: "操作",
     prop: "action",
     cellRenderer: ({ row }) => {
-      if (row.action === 0) {
-        return "余额加款";
-      } else if (row.action === 1) {
-        return "余额减款";
-      } else if (row.action === 2) {
-        return "余额校正";
-      } else if (row.action === 3) {
-        return "授信加款";
-      } else {
-        return "授信减款";
-      }
+      const label =
+        FundOperationTypeList2.find(item => item.value === row.action)?.label ||
+        "";
+      return h("span", label);
     }
   },
   {

@@ -25,11 +25,4 @@ interface AgentSimpleItem {
   name: string;
 }
 
-interface SupplierSimpleItem {
-  /** ID */
-  id: number;
-  /** 名称 */
-  name: string;
-}
-
-export type { FormItemProps, FormProps, AgentSimpleItem, SupplierSimpleItem };
+export type { FormItemProps, FormProps, AgentSimpleItem };

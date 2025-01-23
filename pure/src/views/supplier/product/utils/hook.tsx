@@ -8,10 +8,10 @@ import { addDialog } from "@/components/ReDialog";
 import { reactive, ref, onMounted, h } from "vue";
 import type {
   FormItemProps,
-  SupplierSimpleItem,
   CategoryProps,
   ProductBaseInfoArray
 } from "../utils/types";
+import type { SupplierIdName } from "@/api/types";
 import { deviceDetection } from "@pureadmin/utils";
 import type { PaginationProps } from "@pureadmin/table";
 import { useRoute } from "vue-router";
@@ -35,7 +35,7 @@ export function useDept() {
     background: true
   });
 
-  const supplierItemLists = ref([] as SupplierSimpleItem[]);
+  const supplierItemLists = ref([] as SupplierIdName[]);
   const productCategoryList = ref([] as CategoryProps);
   const productBaseInfoList = ref([] as ProductBaseInfoArray);
   const formRef = ref();

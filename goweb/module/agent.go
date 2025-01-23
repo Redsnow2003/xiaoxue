@@ -38,6 +38,95 @@ func RegisterAgentRoutes(router *gin.Engine) {
 	router.POST("/get-agent-channel-list",getAgentChannelList)
 	router.POST("/agent-channel",addAgentChannel)
 	router.DELETE("/agent-channel",deleteAgentChannel)
+	router.POST("/get-agent-product-channel-list",getAgentProductChannelList)
+}
+
+// 获取供货通道列表
+func getAgentProductChannelList(c *gin.Context){
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK,gin.H{"success":false,"message":"invalid input"})
+		return
+	}
+	db := model.Db
+	agent_id := requestData["agent_id"]
+	switch agent_id.(type) {
+	case float64:
+		db = db.Where("agent_id = ?",agent_id)
+	}
+	agent_name := requestData["agent_name"]
+	if agent_name != nil {
+		agent_name2 := agent_name.(string)
+		if agent_name2 != ""{
+			db = db.Where("agent_name like ?","%"+agent_name2+"%")
+		}
+	}
+	supplier_id := requestData["supplier_id"]
+	switch supplier_id.(type) {
+	case float64:
+		db = db.Where("supplier_id = ?",supplier_id)
+	}
+	supplier_name := requestData["supplier_name"]
+	if supplier_name != nil {
+		supplier_name2 := supplier_name.(string)
+		if supplier_name2 != ""{
+			db = db.Where("supplier_name like ?","%"+supplier_name2+"%")
+		}
+	}
+	business_type := requestData["business_type"]
+	switch business_type.(type) {
+	case float64:
+		db = db.Where("business_type = ?",business_type)
+	}
+	product_id := requestData["product_id"]
+	switch product_id.(type) {
+	case float64:
+		db = db.Where("product_id = ?",product_id)
+	}
+	product_category := requestData["product_category"]
+	switch product_category.(type) {
+	case float64:
+		db = db.Where("product_category = ?",product_category)
+	}
+	operator := requestData["operator"]
+	switch operator.(type) {
+	case float64:
+		db = db.Where("operator = ?",operator)
+	}
+	agent_product_id := requestData["agent_product_id"]
+	switch agent_product_id.(type) {
+	case float64:
+		db = db.Where("agent_product_id = ?",agent_product_id)
+	}
+	supplier_product_id := requestData["supplier_product_id"]
+	switch supplier_product_id.(type) {
+	case float64:
+		db = db.Where("supplier_product_id = ?",supplier_product_id)
+	}
+	up_product_id := requestData["up_product_id"].(string)
+	if up_product_id != "" {
+		db = db.Where("up_product_id = ?",up_product_id)
+	}
+	status := requestData["status"]
+	switch status.(type) {
+	case float64:
+		db = db.Where("status = ?",status)
+	}
+	page := requestData["currentPage"].(float64)
+	pageSize := requestData["pageSize"].(float64)
+
+	offset := (page - 1) * pageSize
+	var total int64
+	var result []model.Agent_product_channel
+	db.Model(&model.Agent_product_channel{}).Count(&total)
+	db.Offset(int(offset)).Limit(int(pageSize)).Find(&result)
+	c.JSON(http.StatusOK,gin.H{"success":true,"message":"","data":gin.H{
+		"list":result,
+		"total":total,
+		"currentPage":page,
+		"pageSize":pageSize,
+	}})
 }
 
 // 添加代理商渠道

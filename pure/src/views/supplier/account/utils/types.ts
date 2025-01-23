@@ -34,13 +34,6 @@ interface FormProps {
   formInline: FormItemProps;
 }
 
-interface SupplierSimpleItem {
-  /** ID */
-  id: number;
-  /** 名称 */
-  name: string;
-}
-
 interface TemplateNameItem {
   /** ID */
   id: number;
@@ -74,7 +67,6 @@ interface TemplateInfoItem {
 export type {
   FormItemProps,
   FormProps,
-  SupplierSimpleItem,
   TemplateNameItem,
   ChangeFundFormProps,
   TemplateInfoItem,

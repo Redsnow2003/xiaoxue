@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { FundOperationTypeList2 } from "@/api/constdata";
 import { formRules } from "../utils/rule";
 import { ChangeFundFormProps } from "../utils/types";
 import AddFill from "@iconify-icons/ri/add-circle-line";
@@ -8,7 +9,7 @@ const props = withDefaults(defineProps<ChangeFundFormProps>(), {
   formInline: () => ({
     agent_id: "", // 供应商ID
     agent_name: "", // 供应商名称
-    fund_action: "", // 余额操作
+    fund_action: 0, // 余额操作
     amount: 0, // 金额
     confirm_amount: 0, // 确认金额
     file: "", // 上传图片
@@ -77,11 +78,12 @@ function handleAvatarSuccess(response: any, files: string | any[]) {
     </el-form-item>
     <el-form-item label="余额操作" prop="fund_action">
       <el-select v-model="newFormInline.fund_action" clearable>
-        <el-option label="余额加款" value="add" />
-        <el-option label="余额减款" value="subtract" />
-        <el-option label="余额校正" value="adjust" />
-        <el-option label="授信加款" value="credit_add" />
-        <el-option label="授信减款" value="credit_subtract" />
+        <el-option
+          v-for="item in FundOperationTypeList2"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value"
+        />
       </el-select>
     </el-form-item>
     <el-form-item label="金额" prop="amount">

@@ -139,6 +139,7 @@ onMounted(async () => {
       <el-form-item label="代理商产品ID" prop="agent_product_id">
         <el-input
           v-model="form.agent_product_id"
+          type="number"
           placeholder="请输入产品ID"
           clearable
           class="!w-[180px]"
@@ -163,6 +164,7 @@ onMounted(async () => {
       <el-form-item label="供货商产品ID" prop="supplier_product_id">
         <el-input
           v-model="form.supplier_product_id"
+          type="number"
           placeholder="请输入产品ID"
           clearable
           class="!w-[180px]"

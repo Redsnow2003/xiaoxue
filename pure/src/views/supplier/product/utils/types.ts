@@ -18,14 +18,6 @@ interface FormItemProps {
 interface FormProps {
   formInline: FormItemProps;
 }
-//供应商简单信息
-interface SupplierSimpleItem {
-  /** ID */
-  id: number;
-  /** 名称 */
-  name: string;
-}
-
 interface CategoryItemProps {
   /** ID */
   id: number;
@@ -47,7 +39,6 @@ interface ProductBaseInfoArray extends Array<ProductBaseInfo> {}
 export type {
   FormItemProps,
   FormProps,
-  SupplierSimpleItem,
   CategoryProps,
   CategoryItemProps,
   ProductBaseInfo,

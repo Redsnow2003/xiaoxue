@@ -17,19 +17,18 @@ import {
 import {
   SupplyStrategyList,
   BusinessTypeList,
-  OperatorListTelecom,
-  ProvinceList,
-  OperatorListAll
+  OperatorListAll,
+  ProvinceList
 } from "@/api/constdata";
 import { addDialog } from "@/components/ReDialog";
 import { reactive, ref, onMounted, h, type Ref } from "vue";
 import type {
   NewProductFormItemProps,
-  SupplierSimpleItem,
   AgentProcuctItem,
   CategoryProps,
   ProductBaseInfoArray
 } from "../utils/types";
+import type { SupplierIdName } from "@/api/types";
 import { deviceDetection, getKeyList } from "@pureadmin/utils";
 import type { PaginationProps } from "@pureadmin/table";
 import { useRoute, useRouter } from "vue-router";
@@ -70,7 +69,7 @@ export function useDept(tableRef: Ref) {
     background: true
   });
 
-  const agentItemLists = ref([] as SupplierSimpleItem[]);
+  const agentItemLists = ref([] as SupplierIdName[]);
   const productCategoryList = ref([] as CategoryProps);
   const productBaseInfoList = ref([] as ProductBaseInfoArray);
   const formRef = ref();
@@ -116,7 +115,7 @@ export function useDept(tableRef: Ref) {
     {
       label: "产品类别",
       prop: "product_category",
-      minWidth: 100,
+      minWidth: 250,
       cellRenderer: ({ row }) => (
         <span>
           {
@@ -134,8 +133,10 @@ export function useDept(tableRef: Ref) {
         <span>
           {row.product_id}
           <br />
+          <hr style="border-color: lightgray;" />
           {row.product_name}
           <br />
+          <hr style="border-color: lightgray;" />
           {row.base_price}
         </span>
       )
@@ -146,7 +147,7 @@ export function useDept(tableRef: Ref) {
       minWidth: 100,
       cellRenderer: ({ row }) => (
         <span>
-          {OperatorListTelecom.find(item => item.value === row.operator)?.label}
+          {OperatorListAll.find(item => item.value === row.operator)?.label}
         </span>
       )
     },

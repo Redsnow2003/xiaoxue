@@ -1,6 +1,6 @@
 import type { PaginationProps } from "@pureadmin/table";
 import {
-  getAgentChannelList,
+  getAgentProductChannelList,
   getAgentSimpleList,
   deleteAgentChannel
 } from "@/api/agent";
@@ -13,13 +13,19 @@ import { reactive, ref, onMounted, type Ref } from "vue";
 import type {
   AgentSimpleItem,
   FormItemProps,
-  SupplierSimpleItem,
   CategoryProps,
   ProductBaseInfoArray
 } from "../utils/types";
+import type { SupplierIdName } from "@/api/types";
 import { useRoute } from "vue-router";
 import { message } from "@/utils/message";
-import { OperatorListTelecom, SupplyStrategyList } from "@/api/constdata";
+import {
+  OperatorListAll,
+  SupplyStrategyList,
+  BusinessTypeList,
+  ProvinceList
+} from "@/api/constdata";
+
 export function useCategory(tableRef: Ref) {
   const form = reactive({
     /** 代理商 */
@@ -32,8 +38,8 @@ export function useCategory(tableRef: Ref) {
     product_id: "",
     product_category: "",
     operator: "",
-    agent_product_id: "",
-    supplier_product_id: "",
+    agent_product_id: "" as any,
+    supplier_product_id: "" as any,
     up_product_id: "",
     status: ""
   });
@@ -42,7 +48,7 @@ export function useCategory(tableRef: Ref) {
   const loading = ref(true);
   const selectedNum = ref(0);
   const agentItemLists = ref([] as AgentSimpleItem[]);
-  const supplierItemLists = ref([] as SupplierSimpleItem[]);
+  const supplierItemLists = ref([] as SupplierIdName[]);
   const productCategoryList = ref([] as CategoryProps);
   const productBaseInfoList = ref([] as ProductBaseInfoArray);
   const route = useRoute();
@@ -63,7 +69,14 @@ export function useCategory(tableRef: Ref) {
     {
       label: "业务类型",
       prop: "business_type",
-      minWidth: 70
+      cellRenderer: ({ row }) => (
+        <span>
+          {
+            BusinessTypeList.find(item => item.value === row.business_type)
+              ?.label
+          }
+        </span>
+      )
     },
     {
       label: "通道ID",
@@ -72,16 +85,28 @@ export function useCategory(tableRef: Ref) {
     {
       label: "产品",
       prop: "product_id",
+      minWidth: 150,
       cellRenderer: ({ row }) => (
         <span>
-          {row.product_id + "\n " + row.product_name + row.base_price}
+          {row.product_id} <br /> <hr style="border-color: lightgray;" />{" "}
+          {row.product_name} <br /> <hr style="border-color: lightgray;" />
+          {row.base_price}
         </span>
       )
     },
     {
       label: "产品类别",
       prop: "product_category",
-      minWidth: 100
+      minWidth: 150,
+      cellRenderer: ({ row }) => (
+        <span>
+          {
+            productCategoryList.value.find(
+              item => item.id === row.product_category
+            )?.category_name
+          }
+        </span>
+      )
     },
     {
       label: "产品运营商",
@@ -89,7 +114,7 @@ export function useCategory(tableRef: Ref) {
       minWidth: 100,
       cellRenderer: ({ row }) => (
         <span>
-          {OperatorListTelecom.find(item => item.value === row.operator)?.label}
+          {OperatorListAll.find(item => item.value === row.operator)?.label}
         </span>
       )
     },
@@ -100,16 +125,23 @@ export function useCategory(tableRef: Ref) {
     {
       label: "代理商",
       prop: "agent_id",
+      minWidth: 150,
       cellRenderer: ({ row }) => (
-        <span>{row.agent_id + "\n " + row.agent_name}</span>
+        <span>
+          {row.agent_id} <br /> <hr style="border-color: lightgray;" />{" "}
+          {row.agent_name}
+        </span>
       )
     },
     {
       label: "代理折扣",
       prop: "agent_discount",
+      minWidth: 150,
       cellRenderer: ({ row }) => (
         <span>
-          {row.agent_discount + "\n " + row.agent_discount * row.base_price}
+          {row.agent_discount}
+          <br /> <hr style="border-color: lightgray;" />
+          {(row.agent_discount * row.base_price).toFixed(2)}
         </span>
       )
     },
@@ -132,8 +164,12 @@ export function useCategory(tableRef: Ref) {
     {
       label: "供货商",
       prop: "supplier_id",
+      minWidth: 150,
       cellRenderer: ({ row }) => (
-        <span>{row.supplier_id + "\n " + row.supplier_name}</span>
+        <span>
+          {row.supplier_id} <br /> <hr style="border-color: lightgray;" />{" "}
+          {row.supplier_name}
+        </span>
       )
     },
     {
@@ -141,9 +177,9 @@ export function useCategory(tableRef: Ref) {
       prop: "supplier_discount",
       cellRenderer: ({ row }) => (
         <span>
-          {row.supplier_discount +
-            "\n " +
-            row.supplier_discount * row.base_price}
+          {row.supplier_discount}
+          <br /> <hr style="border-color: lightgray;" />
+          {(row.supplier_discount * row.base_price).toFixed(2)}
         </span>
       )
     },
@@ -161,16 +197,17 @@ export function useCategory(tableRef: Ref) {
       prop: "weight"
     },
     {
-      label: "权重",
-      prop: "weight"
-    },
-    {
       label: "优先级",
       prop: "priority"
     },
     {
       label: "分省",
-      prop: "province"
+      prop: "province",
+      cellRenderer: ({ row }) => (
+        <span>
+          {ProvinceList.find(item => item.value === row.province)?.label}
+        </span>
+      )
     },
     {
       label: "状态",
@@ -223,7 +260,13 @@ export function useCategory(tableRef: Ref) {
   async function onSearch() {
     loading.value = true;
     var params = { ...form, ...pagination };
-    const { data } = await getAgentChannelList(params);
+    if (params.agent_product_id != "") {
+      params.agent_product_id = Number(params.agent_product_id);
+    }
+    if (params.supplier_product_id != "") {
+      params.supplier_product_id = Number(params.supplier_product_id);
+    }
+    const { data } = await getAgentProductChannelList(params);
     dataList.value = data.list;
     pagination.total = data.total;
     pagination.pageSize = data.pageSize;
@@ -236,7 +279,9 @@ export function useCategory(tableRef: Ref) {
 
   const resetForm = formEl => {
     if (!formEl) return;
+    var id = form.agent_id;
     formEl.resetFields();
+    form.agent_id = id;
     console.log("resetForm");
     onSearch();
   };

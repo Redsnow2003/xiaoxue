@@ -176,3 +176,14 @@ export const deleteAgentChannel = (data: object) => {
     data
   });
 };
+
+/** 代理商管理-代理商产品通道列表 */
+export const getAgentProductChannelList = (data: object) => {
+  return http.request<ResultTable>(
+    "post",
+    baseUrlApi("/get-agent-product-channel-list"),
+    {
+      data
+    }
+  );
+};

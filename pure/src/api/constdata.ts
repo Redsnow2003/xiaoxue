@@ -122,6 +122,65 @@ const SupplyStrategyList = [
   { label: "成功率", value: 3 }
 ];
 
+//资金操作类型
+const FundOperationTypeList = [
+  { label: "余额加款", value: 0 },
+  { label: "余额减款", value: 1 },
+  { label: "余额校正", value: 2 },
+  { label: "授信加款", value: 3 },
+  { label: "授信减款", value: 4 },
+  { label: "余额支出", value: 5 },
+  { label: "余额退款", value: 6 }
+];
+
+const FundOperationTypeList2 = [
+  { label: "余额加款", value: 0 },
+  { label: "余额减款", value: 1 },
+  { label: "余额校正", value: 2 },
+  { label: "授信加款", value: 3 },
+  { label: "授信减款", value: 4 }
+];
+
+const FundOperationTypeList3 = [
+  { label: "余额加款", value: 0 },
+  { label: "余额减款", value: 1 },
+  { label: "余额校正", value: 2 }
+];
+
+// 通知状态列表
+const NotifyStatusList = [
+  { label: "未发送", value: 0 },
+  { label: "通知成功", value: 1 },
+  { label: "已发送", value: 2 }
+];
+
+//订单状态
+const OrderStatusList = [
+  { label: "执行中", value: 0 },
+  { label: "成功", value: 1 },
+  { label: "失败", value: 2 },
+  { label: "缓存", value: 3 },
+  { label: "已返销", value: 4 },
+  { label: "备用通道重试中", value: 5 }
+];
+
+//供货单状态
+const SupplierOrderStatusList = [
+  { label: "执行中", value: 0 },
+  { label: "成功", value: 1 },
+  { label: "失败", value: 2 },
+  { label: "上游未确认", value: 3 },
+  { label: "已返销", value: 4 }
+];
+
+//批量超时操作类型
+const BatchTimeoutType = [
+  { label: "立即超时", value: 0 },
+  { label: "多久后超时", value: 1 },
+  { label: "什么时候超时", value: 2 },
+  { label: "订单创建多久超时", value: 3 }
+];
+
 export {
   OperatorListTelecom,
   OperatorListTelecom2,
@@ -132,5 +191,12 @@ export {
   ProvinceList,
   UnitList,
   BusinessTypeList,
-  SupplyStrategyList
+  SupplyStrategyList,
+  FundOperationTypeList,
+  FundOperationTypeList2,
+  FundOperationTypeList3,
+  NotifyStatusList,
+  OrderStatusList,
+  BatchTimeoutType,
+  SupplierOrderStatusList
 };

@@ -48,7 +48,7 @@ interface AgentSimpleItem {
 interface ChangeFundFormItemProps {
   agent_id: string; // 代理商ID
   agent_name: string; // 代理商名称
-  fund_action: string; // 余额操作
+  fund_action: number; // 余额操作
   amount: number; // 金额
   confirm_amount: number; // 确认金额
   file: string; // 附件
