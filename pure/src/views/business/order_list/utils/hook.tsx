@@ -1,3 +1,4 @@
+import { ElMessageBox } from "element-plus";
 import BatchStatusForm from "../form/batchstatus.vue";
 import BatchBackupForm from "../form/batchbackup.vue";
 import BatchTimeoutForm from "../form/batchtimeout.vue";
@@ -9,15 +10,15 @@ import OrderQueryLogForm from "../form/orderquerylog.vue";
 import OrderNotifyLogForm from "../form/ordernotifylog.vue";
 import { addDialog } from "@/components/ReDialog";
 import type {
-  FormItemProps,
-  AgentSimpleItem,
-  ProductBaseInfoArray,
+  OrderItemProps,
   CategoryProps,
   BatchStatusProps,
   BatchBackupProps,
   BatchTimeoutProps,
   ChangeRemarkProps
 } from "../utils/types";
+import type { ProductIdName } from "@/api/types";
+import type { AgentIdName } from "@/api/types";
 import { timeDiff } from "@/api/utils";
 import type { PaginationProps } from "@pureadmin/table";
 import { deviceDetection, getKeyList } from "@pureadmin/utils";
@@ -39,7 +40,8 @@ import {
   batchOrderNotice,
   batchOrderTimeout,
   batchUpdateOrderStatusRemark,
-  updateOrderRemark
+  updateOrderRemark,
+  agentOrderNotice
 } from "@/api/order";
 
 export function useCategory(tableRef: Ref) {
@@ -67,8 +69,8 @@ export function useCategory(tableRef: Ref) {
   const dataList = ref([]);
   const selectedNum = ref(0);
   const loading = ref(true);
-  const agentItemLists = ref([] as AgentSimpleItem[]);
-  const productBaseInfoList = ref([] as ProductBaseInfoArray);
+  const agentItemLists = ref([] as AgentIdName[]);
+  const productBaseInfoList = ref([] as ProductIdName[]);
   const productCategoryList = ref([] as CategoryProps);
   const pagination = reactive<PaginationProps>({
     total: 0,
@@ -102,6 +104,7 @@ export function useCategory(tableRef: Ref) {
         <span>
           {row.id}
           <br />
+          <hr style="border-color: lightgray;" />
           {row.down_id}
         </span>
       )
@@ -110,9 +113,13 @@ export function useCategory(tableRef: Ref) {
       label: "代理商",
       prop: "agent_id",
       cellRenderer: ({ row }) => (
-        <span>
+        <span
+          style="cursor: pointer;color: #409EFF; text-decoration: underline;"
+          onClick={() => gotoAgentInfo(row)}
+        >
           {row.agent_id}
           <br />
+          <hr style="border-color: lightgray;" />
           {row.agent_name}
         </span>
       )
@@ -121,7 +128,10 @@ export function useCategory(tableRef: Ref) {
       label: "产品ID|产品名称|基础价|运营商",
       prop: "product_id",
       cellRenderer: ({ row }) => (
-        <span>
+        <span
+          style="cursor: pointer;color: #409EFF; text-decoration: underline;"
+          onClick={() => gotoProductInfo(row)}
+        >
           {row.product_id}
           <br />
           <hr style="border-color: lightgray;" />
@@ -158,10 +168,10 @@ export function useCategory(tableRef: Ref) {
           {row.recharge_number}
           <br />
           <hr style="border-color: lightgray;" />
-          {row.operator}
+          {OperatorListAll.find(item => item.value === row.operator)?.label}
           <br />
           <hr style="border-color: lightgray;" />
-          {location}
+          {row.location}
         </span>
       )
     },
@@ -183,7 +193,10 @@ export function useCategory(tableRef: Ref) {
     },
     {
       label: "超时时间(秒)",
-      prop: "timeout"
+      prop: "timeout",
+      cellRenderer: ({ row }) => (
+        <span>{row.is_timeout === 1 ? row.timeout : ""}</span>
+      )
     },
     {
       label: "创建时间|完成时间",
@@ -227,6 +240,30 @@ export function useCategory(tableRef: Ref) {
       slot: "operation"
     }
   ];
+
+  //点击跳转到对应的代理商页面
+  function gotoAgentInfo(row?: OrderItemProps) {
+    const router = useRouter();
+    console.log("handleAgentproduct", row);
+    if (row && row.id) {
+      // 携带参数 row.id 跳转到产品配置页面
+      router.push({});
+    } else {
+      console.error("Row or Row ID is missing");
+    }
+  }
+
+  //点击跳转到对应产品配置页面
+  function gotoProductInfo(row?: OrderItemProps) {
+    const router = useRouter();
+    console.log("handleAgentproduct", row);
+    if (row && row.id) {
+      // 携带参数 row.id 跳转到产品配置页面
+      router.push({});
+    } else {
+      console.error("Row or Row ID is missing");
+    }
+  }
 
   function handleSizeChange(val: number) {
     pagination.pageSize = val;
@@ -275,7 +312,6 @@ export function useCategory(tableRef: Ref) {
   /** 高亮当前权限选中行 */
   function rowStyle({ row: { id } }) {
     return {
-      cursor: "pointer",
       background: id === curRow.value?.id ? "var(--el-fill-color-light)" : ""
     };
   }
@@ -335,11 +371,21 @@ export function useCategory(tableRef: Ref) {
   }
 
   async function handleBatchNotify() {
+    ElMessageBox.confirm(`是否确认通知所选数据项?`, "确认通知", {
+      confirmButtonText: "确认",
+      cancelButtonText: "取消",
+      type: "warning"
+    })
+      .then(() => {
+        const curSelected = tableRef.value.getTableRef().getSelectionRows();
+        var ids = getKeyList(curSelected, "id");
+        var params = { ids: ids };
+        batchOrderNotice(params).then(() => {
+          onSearch();
+        });
+      })
+      .catch(() => {});
     // 批量通知的逻辑
-    const curSelected = tableRef.value.getTableRef().getSelectionRows();
-    var ids = getKeyList(curSelected, "id");
-    await batchOrderNotice(ids);
-    onSearch();
   }
 
   function handleBatchBackup() {
@@ -359,10 +405,8 @@ export function useCategory(tableRef: Ref) {
       fullscreen: deviceDetection(),
       fullscreenIcon: true,
       closeOnClickModal: false,
-      contentRenderer: () =>
-        h(BatchBackupForm, { ref: formRef, formInline: null }),
-      beforeSure: (done, { options }) => {
-        const FormRef = formRef.value.getRef();
+      contentRenderer: () => h(BatchBackupForm, { formInline: null }),
+      beforeSure: async (done, { options }) => {
         const formData = options.props.formInline as BatchBackupProps;
         const curSelected = tableRef.value.getTableRef().getSelectionRows();
         var ids = getKeyList(curSelected, "id");
@@ -375,12 +419,8 @@ export function useCategory(tableRef: Ref) {
           done(); // 关闭弹框
           onSearch(); // 刷新表格数据
         }
-        FormRef.validate(async valid => {
-          if (valid) {
-            await batchBackupSubmit(curData);
-            chores();
-          }
-        });
+        await batchBackupSubmit(curData);
+        chores();
       }
     });
   }
@@ -389,7 +429,8 @@ export function useCategory(tableRef: Ref) {
     // 批量取消备份的逻辑
     const curSelected = tableRef.value.getTableRef().getSelectionRows();
     var ids = getKeyList(curSelected, "id");
-    await batchBackupCancel(ids);
+    var params = { ids: ids };
+    await batchBackupCancel(params);
     onSearch();
   }
 
@@ -410,10 +451,8 @@ export function useCategory(tableRef: Ref) {
       fullscreen: deviceDetection(),
       fullscreenIcon: true,
       closeOnClickModal: false,
-      contentRenderer: () =>
-        h(BatchTimeoutForm, { ref: formRef, formInline: null }),
-      beforeSure: (done, { options }) => {
-        const FormRef = formRef.value.getRef();
+      contentRenderer: () => h(BatchTimeoutForm, { formInline: null }),
+      beforeSure: async (done, { options }) => {
         const formData = options.props.formInline as BatchTimeoutProps;
         const curSelected = tableRef.value.getTableRef().getSelectionRows();
         var ids = getKeyList(curSelected, "id");
@@ -426,12 +465,8 @@ export function useCategory(tableRef: Ref) {
           done(); // 关闭弹框
           onSearch(); // 刷新表格数据
         }
-        FormRef.validate(async valid => {
-          if (valid) {
-            await batchOrderTimeout(curData);
-            chores();
-          }
-        });
+        await batchOrderTimeout(curData);
+        chores();
       }
     });
   }
@@ -440,7 +475,8 @@ export function useCategory(tableRef: Ref) {
     // 批量取消的逻辑
     const curSelected = tableRef.value.getTableRef().getSelectionRows();
     var ids = getKeyList(curSelected, "id");
-    await batchOrderCancel(ids);
+    var params = { ids: ids };
+    await batchOrderCancel(params);
     onSearch();
   }
 
@@ -448,11 +484,12 @@ export function useCategory(tableRef: Ref) {
     // 批量手动处理的逻辑
     const curSelected = tableRef.value.getTableRef().getSelectionRows();
     var ids = getKeyList(curSelected, "id");
-    await batchOrderManual(ids);
+    var params = { ids: ids };
+    await batchOrderManual(params);
     onSearch();
   }
 
-  function handleLookSupplierOrder(row?: FormItemProps) {
+  function handleLookSupplierOrder(row?: OrderItemProps) {
     // 查看供应商订单的逻辑
     addDialog({
       title: `相关供货单列表`,
@@ -472,12 +509,31 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleNotifyStatus(row?: FormItemProps) {
+  function handleNotifyStatus(row?: OrderItemProps) {
     // 通知状态的逻辑
-    console.log("handleNotifyStatus", row);
+    ElMessageBox.confirm(
+      `是否确认通知${row.id}订单状态给代理商？`,
+      "确认通知",
+      {
+        confirmButtonText: "确认",
+        cancelButtonText: "取消",
+        type: "warning"
+      }
+    )
+      .then(() => {
+        // 确认通知的逻辑
+        var params = { order_id: row.id, agent_id: row.agent_id };
+        agentOrderNotice(params).then(() => {
+          onSearch();
+        });
+      })
+      .catch(() => {
+        // 取消通知的逻辑
+        console.log(`取消通知订单 ${row.id} 状态给代理商`);
+      });
   }
 
-  function handleChangeRemark(row?: FormItemProps) {
+  function handleChangeRemark(row?: OrderItemProps) {
     // 修改备注的逻辑
     addDialog({
       title: `修改订单备注`,
@@ -486,7 +542,7 @@ export function useCategory(tableRef: Ref) {
           /** 订单ID */
           order_id: row.id,
           /** 备注 */
-          remark: ""
+          remark: row.remark
         }
       },
       width: "30%",
@@ -513,7 +569,7 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleBackupLog(row?: FormItemProps) {
+  function handleBackupLog(row?: OrderItemProps) {
     // 备份日志的逻辑
     addDialog({
       title: `备用通道重新提交记录`,
@@ -532,10 +588,10 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleSubmitLog(row?: FormItemProps) {
+  function handleSubmitLog(row?: OrderItemProps) {
     // 提交日志的逻辑
     addDialog({
-      title: `提单日志`,
+      title: `通知日志`,
       props: {
         order_id: row.id
       },
@@ -552,7 +608,7 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleQueryLog(row?: FormItemProps) {
+  function handleQueryLog(row?: OrderItemProps) {
     // 查询日志的逻辑
     addDialog({
       title: `提单日志`,
@@ -572,7 +628,7 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleNotifyLog(row?: FormItemProps) {
+  function handleNotifyLog(row?: OrderItemProps) {
     // 通知日志的逻辑
     addDialog({
       title: `提单日志`,
@@ -631,15 +687,15 @@ export function useCategory(tableRef: Ref) {
 function useProductHandlers() {
   const router = useRouter();
 
-  function handleAgentproduct(row?: FormItemProps) {
-    console.log("handleAgentChannel", row);
+  function handleAgentproduct(row?: OrderItemProps) {
+    console.log("handleAgentproduct", row);
     if (row && row.id) {
       // 携带参数 row.id 跳转到产品配置页面
       router.push({
-        path: "/agent/productchannel/index",
+        path: "/agent/product/index",
         query: {
-          agent_id: row.id,
-          agent_name: row.name
+          agent_id: row.agent_id,
+          agent_name: row.agent_name
         }
       });
     } else {

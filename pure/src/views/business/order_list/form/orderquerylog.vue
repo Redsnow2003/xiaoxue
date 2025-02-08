@@ -1,11 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref, h } from "vue";
-import { getAgentFundLog } from "@/api/agent";
-import {
-  FundOperationTypeList2,
-  SupplierOrderStatusList
-} from "@/api/constdata";
-import { agentOrderQuery } from "@/api/order";
+import { onMounted, ref } from "vue";
+import { agentOrderQueryLog } from "@/api/order";
 const props = defineProps({
   order_id: {
     type: Number,
@@ -62,7 +57,7 @@ async function onSearch() {
   var requestData = {
     order_id: order_id.value
   };
-  const { data } = await agentOrderQuery(requestData);
+  const { data } = await agentOrderQueryLog(requestData);
   console.log(data);
   dataList.value = data;
 }

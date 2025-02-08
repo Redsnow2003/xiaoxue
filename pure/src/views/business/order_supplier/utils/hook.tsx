@@ -1,6 +1,6 @@
 import BatchCheckTemplateForm from "../form/batchchecktemplate.vue";
 import BatchUrgeTemplateForm from "../form/batchurgetemplate.vue";
-import BatchBackupSubmitForm from "../form/batchbackupsubmit.vue";
+import BatchBackupSubmitForm from "../form/batchbackup.vue";
 import OrderInfoForm from "../form/orderinfo.vue";
 import OrderUpInfoForm from "../form/orderupinfo.vue";
 import ChangeRemarkForm from "../form/changeremark.vue";
@@ -12,12 +12,12 @@ import OrderCancelLogForm from "../form/ordercancellog.vue";
 import { addDialog } from "@/components/ReDialog";
 import type {
   FormItemProps,
-  AgentSimpleItem,
-  ProductBaseInfoArray,
   CategoryProps,
   ChangeRemarkProps,
   BatchBackupProps
 } from "../utils/types";
+import type { ProductIdName } from "@/api/types";
+import type { AgentIdName } from "@/api/types";
 import type { SupplierIdName } from "@/api/types";
 import { timeDiff } from "@/api/utils";
 import type { PaginationProps } from "@pureadmin/table";
@@ -32,7 +32,7 @@ import {
 } from "@/api/constdata";
 import { getAgentSimpleList } from "@/api/agent";
 import {
-  getOrderList,
+  getSupplierOrderList,
   batchSupplierCancel,
   batchSupplierManualCheck,
   batchSupplierAutoCheck,
@@ -41,6 +41,10 @@ import {
   supplierOrderFailToSuccess
 } from "@/api/order";
 import { getSupplierSimpleList } from "@/api/supplier";
+import {
+  getProductCategoryList,
+  getProductInformationIdAndName
+} from "@/api/product";
 
 export function useCategory(tableRef: Ref) {
   const form = reactive({
@@ -65,9 +69,9 @@ export function useCategory(tableRef: Ref) {
   const dataList = ref([]);
   const selectedNum = ref(0);
   const loading = ref(true);
-  const agentItemLists = ref([] as AgentSimpleItem[]);
+  const agentItemLists = ref([] as AgentIdName[]);
   const supplierItemLists = ref([] as SupplierIdName[]);
-  const productBaseInfoList = ref([] as ProductBaseInfoArray);
+  const productBaseInfoList = ref([] as ProductIdName[]);
   const productCategoryList = ref([] as CategoryProps);
   const pagination = reactive<PaginationProps>({
     total: 0,
@@ -254,7 +258,8 @@ export function useCategory(tableRef: Ref) {
   async function onSearch() {
     loading.value = true;
     var params = { ...form, ...pagination };
-    const { data } = await getOrderList(params);
+    const { data } = await getSupplierOrderList(params);
+    console.log(data);
     dataList.value = data.list;
     pagination.total = data.total;
     pagination.pageSize = data.pageSize;
@@ -285,6 +290,11 @@ export function useCategory(tableRef: Ref) {
     agentItemLists.value = response.data;
     const supplierResponse = await getSupplierSimpleList();
     supplierItemLists.value = supplierResponse.data;
+    var requestData = { category_name: "", currentPage: 1, pageSize: 100 };
+    const response2 = await getProductCategoryList(requestData);
+    productCategoryList.value = response2.data.list;
+    const response3 = await getProductInformationIdAndName();
+    productBaseInfoList.value = response3.data;
   });
 
   function handleExportCSV() {

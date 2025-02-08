@@ -75,16 +75,23 @@ export const updateOrderRemark = (data: object) => {
   });
 };
 
-/** 代理商订单提交信息 */
-export const agentOrderSubmit = (data: object) => {
-  return http.request<Result>("post", baseUrlApi("/agent-order-submit"), {
+/** 代理商订单提交日志 */
+export const agentOrderSubmitLog = (data: object) => {
+  return http.request<Result>("post", baseUrlApi("/agent-order-submit-log"), {
     data
   });
 };
 
-/** 代理商订单查单信息 */
-export const agentOrderQuery = (data: object) => {
-  return http.request<Result>("post", baseUrlApi("/agent-order-query"), {
+/** 代理商订单查单日志 */
+export const agentOrderQueryLog = (data: object) => {
+  return http.request<Result>("post", baseUrlApi("/agent-order-query-log"), {
+    data
+  });
+};
+
+/** 代理商订单通知日志 */
+export const agentOrderNoticeLog = (data: object) => {
+  return http.request<Result>("post", baseUrlApi("/agent-order-notice-log"), {
     data
   });
 };
@@ -148,6 +155,31 @@ export const updateSupplierOrderRemark = (data: object) => {
   return http.request<Result>(
     "put",
     baseUrlApi("/update-supplier-order-remark"),
+    {
+      data
+    }
+  );
+};
+
+/** 订单查找电话号码 */
+export const orderFindPhone = (data: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/order-find-phone"), {
+    data
+  });
+};
+
+/** 备用通道提交日志 */
+export const backupSubmitLog = (data: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/backup-submit-log"), {
+    data
+  });
+};
+
+/** 删除备用通道提交日志 */
+export const deleteBackupSubmitLog = (data: object) => {
+  return http.request<Result>(
+    "delete",
+    baseUrlApi("/delete-backup-submit-log"),
     {
       data
     }

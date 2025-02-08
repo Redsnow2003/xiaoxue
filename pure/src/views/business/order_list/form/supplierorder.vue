@@ -17,8 +17,11 @@ const columns: TableColumnList = [
     label: "供货单号|上游单号",
     prop: "id",
     cellRenderer: ({ row }) => {
-      const label = row.id + h("br") + h("hr") + row.up_id;
-      return h("span", label);
+      return h("span", [
+        h("div", row.id),
+        h("hr", { style: "border-color: lightgray;" }),
+        h("div", row.up_id)
+      ]);
     }
   },
   {
@@ -33,12 +36,11 @@ const columns: TableColumnList = [
     label: "供货折扣|供货总价",
     prop: "supplier_discount",
     cellRenderer: ({ row }) => {
-      const label =
-        row.supplier_discount +
-        h("br") +
-        h("hr") +
-        (row.supplier_discount * row.base_price * row.count).toFixed(2);
-      return h("span", label);
+      return h("span", [
+        h("div", row.supplier_discount),
+        h("hr", { style: "border-color: lightgray;" }),
+        h("div", (row.base_price * row.count).toFixed(2))
+      ]);
     }
   },
   {
@@ -86,7 +88,9 @@ function getRef() {
 
 async function onSearch() {
   var requestData = {
-    order_id: order_id.value
+    order_id: order_id.value,
+    currentPage: 1,
+    pageSize: 100
   };
   const { data } = await getSupplierOrderList(requestData);
   console.log(data);

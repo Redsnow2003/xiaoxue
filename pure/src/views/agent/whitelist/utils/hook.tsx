@@ -9,7 +9,8 @@ import {
   deleteAgentIpWhiteList
 } from "@/api/agent";
 import { reactive, ref, onMounted, h } from "vue";
-import type { AgentSimpleItem, FormItemProps } from "../utils/types";
+import type { FormItemProps } from "../utils/types";
+import type { AgentIdName } from "@/api/types";
 import { deviceDetection } from "@pureadmin/utils";
 import { useRoute } from "vue-router";
 import { message } from "@/utils/message";
@@ -25,7 +26,7 @@ export function useCategory() {
   const dataList = ref([]);
   const formRef = ref();
   const loading = ref(true);
-  const agentItemLists = ref([] as AgentSimpleItem[]);
+  const agentItemLists = ref([] as AgentIdName[]);
   const route = useRoute();
   const disabled = ref(false);
   const pagination = reactive<PaginationProps>({

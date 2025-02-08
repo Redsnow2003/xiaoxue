@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref, h } from "vue";
 import { getAgentFundLog } from "@/api/agent";
-import {
-  FundOperationTypeList2,
-  SupplierOrderStatusList
-} from "@/api/constdata";
-import { agentOrderNotice } from "@/api/order";
+import { NotifyStatusList } from "@/api/constdata";
+import { agentOrderNoticeLog } from "@/api/order";
 const props = defineProps({
   order_id: {
     type: Number,
@@ -35,7 +32,11 @@ const columns: TableColumnList = [
   },
   {
     label: "通知状态",
-    prop: "notify_status"
+    prop: "notify_status",
+    formatter: (row: any) => {
+      return NotifyStatusList.find(item => item.value === row.notify_status)
+        ?.label;
+    }
   },
   {
     label: "通知时间",
@@ -58,7 +59,7 @@ async function onSearch() {
   var requestData = {
     order_id: order_id.value
   };
-  const { data } = await agentOrderNotice(requestData);
+  const { data } = await agentOrderNoticeLog(requestData);
   console.log(data);
   dataList.value = data;
 }

@@ -25,9 +25,9 @@ import { reactive, ref, onMounted, h, type Ref } from "vue";
 import type {
   NewProductFormItemProps,
   AgentProcuctItem,
-  CategoryProps,
-  ProductBaseInfoArray
+  CategoryProps
 } from "../utils/types";
+import type { ProductIdName } from "@/api/types";
 import type { SupplierIdName } from "@/api/types";
 import { deviceDetection, getKeyList } from "@pureadmin/utils";
 import type { PaginationProps } from "@pureadmin/table";
@@ -71,7 +71,7 @@ export function useDept(tableRef: Ref) {
 
   const agentItemLists = ref([] as SupplierIdName[]);
   const productCategoryList = ref([] as CategoryProps);
-  const productBaseInfoList = ref([] as ProductBaseInfoArray);
+  const productBaseInfoList = ref([] as ProductIdName[]);
   const formRef = ref();
   const selectedNum = ref(0);
   const dataList = ref([]);

@@ -6,7 +6,8 @@ import fundLogForm from "../form/fundlog.vue";
 import createAccountForm from "../form/createaccount.vue";
 import { message } from "@/utils/message";
 import { addDialog } from "@/components/ReDialog";
-import type { FormItemProps, AgentSimpleItem } from "../utils/types";
+import type { FormItemProps } from "../utils/types";
+import type { AgentIdName } from "@/api/types";
 import type { PaginationProps } from "@pureadmin/table";
 import { deviceDetection, getKeyList } from "@pureadmin/utils";
 import {
@@ -35,7 +36,7 @@ export function useCategory(tableRef: Ref) {
   const dataList = ref([]);
   const selectedNum = ref(0);
   const loading = ref(true);
-  const agentItemLists = ref([] as AgentSimpleItem[]);
+  const agentItemLists = ref([] as AgentIdName[]);
   const pagination = reactive<PaginationProps>({
     total: 0,
     pageSize: 10,

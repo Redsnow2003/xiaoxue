@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, h } from "vue";
-import { getAgentFundLog } from "@/api/agent";
+import { backupSubmitLog, deleteBackupSubmitLog } from "@/api/order";
+import { pa } from "element-plus/es/locale/index.mjs";
 const props = defineProps({
   order_id: {
     type: Number,
@@ -59,11 +60,20 @@ function getRef() {
   return ruleFormRef.value;
 }
 
+function deleteRow(row) {
+  var params = {
+    id: row.id
+  };
+  deleteBackupSubmitLog(params).then(() => {
+    onSearch();
+  });
+}
+
 async function onSearch() {
   var requestData = {
     order_id: order_id.value
   };
-  const { data } = await getAgentFundLog(requestData);
+  const { data } = await backupSubmitLog(requestData);
   console.log(data);
   dataList.value = data.list;
 }
@@ -88,7 +98,12 @@ defineExpose({ getRef });
     }"
   >
     <template #operation="{ row }">
-      <el-button class="reset-margin" link type="primary" @click="row">
+      <el-button
+        class="reset-margin"
+        link
+        type="primary"
+        @click="deleteRow(row)"
+      >
         删除
       </el-button>
     </template>

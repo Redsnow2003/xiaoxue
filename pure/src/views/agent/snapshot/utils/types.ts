@@ -54,13 +54,6 @@ interface FormProps {
   formInline: FormItemProps;
 }
 
-interface AgentSimpleItem {
-  /** ID */
-  id: number;
-  /** 名称 */
-  name: string;
-}
-
 interface CategoryItemProps {
   /** ID */
   id: number;
@@ -70,19 +63,4 @@ interface CategoryItemProps {
 
 interface CategoryProps extends Array<CategoryItemProps> {}
 
-interface ProductBaseInfo {
-  /** ID */
-  id: number;
-  /** 名称 */
-  name: string;
-}
-
-interface ProductBaseInfoArray extends Array<ProductBaseInfo> {}
-
-export type {
-  FormItemProps,
-  FormProps,
-  AgentSimpleItem,
-  CategoryProps,
-  ProductBaseInfoArray
-};
+export type { FormItemProps, FormProps, CategoryProps };

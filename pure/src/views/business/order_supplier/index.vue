@@ -231,7 +231,7 @@ onMounted(async () => {
           <el-option
             v-for="item in supplierItemLists"
             :key="item.id"
-            :label="item.name"
+            :label="item.id + ' ' + item.name"
             :value="item.id"
           />
         </el-select>

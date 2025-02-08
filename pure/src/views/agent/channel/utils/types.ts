@@ -18,11 +18,4 @@ interface FormProps {
   formInline: FormItemProps;
 }
 
-interface AgentSimpleItem {
-  /** ID */
-  id: number;
-  /** 名称 */
-  name: string;
-}
-
-export type { FormItemProps, FormProps, AgentSimpleItem };
+export type { FormItemProps, FormProps };

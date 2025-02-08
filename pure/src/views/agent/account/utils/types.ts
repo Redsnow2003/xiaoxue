@@ -38,13 +38,6 @@ interface FormProps {
   formInline: FormItemProps;
 }
 
-interface AgentSimpleItem {
-  /** ID */
-  id: number;
-  /** 名称 */
-  name: string;
-}
-
 interface ChangeFundFormItemProps {
   agent_id: string; // 代理商ID
   agent_name: string; // 代理商名称
@@ -71,7 +64,6 @@ interface TemplateInfoItem {
 export type {
   FormItemProps,
   FormProps,
-  AgentSimpleItem,
   ChangeFundFormProps,
   TemplateInfoItem,
   ChangeFundFormItemProps

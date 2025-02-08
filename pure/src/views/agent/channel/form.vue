@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { formRules } from "./utils/rule";
-import { FormProps, AgentSimpleItem } from "./utils/types";
+import { FormProps } from "./utils/types";
+import { AgentIdName } from "@/api/types";
 import { SupplierIdName } from "@/api/types";
 import { getAgentSimpleList } from "@/api/agent";
 import { getSupplierSimpleList } from "@/api/supplier";
@@ -24,7 +25,7 @@ const props = withDefaults(defineProps<FormProps>(), {
 
 const ruleFormRef = ref();
 const newFormInline = ref(props.formInline);
-const agentItemLists = ref([] as AgentSimpleItem[]);
+const agentItemLists = ref([] as AgentIdName[]);
 const supplierItemLists = ref([] as SupplierIdName[]);
 function getRef() {
   return ruleFormRef.value;

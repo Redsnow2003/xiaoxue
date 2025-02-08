@@ -85,22 +85,11 @@ interface CategoryItemProps {
 
 interface CategoryProps extends Array<CategoryItemProps> {}
 
-interface ProductBaseInfo {
-  /** ID */
-  id: number;
-  /** 名称 */
-  name: string;
-}
-
-interface ProductBaseInfoArray extends Array<ProductBaseInfo> {}
-
 export type {
   NewProductFormItemProps,
   NewProdtuctFormProps,
   AgentProcuctItem,
   AgentProductProps,
   CategoryProps,
-  CategoryItemProps,
-  ProductBaseInfo,
-  ProductBaseInfoArray
+  CategoryItemProps
 };

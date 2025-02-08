@@ -6,11 +6,8 @@ import {
 } from "@/api/product";
 import { addDialog } from "@/components/ReDialog";
 import { reactive, ref, onMounted, h } from "vue";
-import type {
-  FormItemProps,
-  CategoryProps,
-  ProductBaseInfoArray
-} from "../utils/types";
+import type { FormItemProps, CategoryProps } from "../utils/types";
+import type { ProductIdName } from "@/api/types";
 import type { SupplierIdName } from "@/api/types";
 import { deviceDetection } from "@pureadmin/utils";
 import type { PaginationProps } from "@pureadmin/table";
@@ -37,7 +34,7 @@ export function useDept() {
 
   const supplierItemLists = ref([] as SupplierIdName[]);
   const productCategoryList = ref([] as CategoryProps);
-  const productBaseInfoList = ref([] as ProductBaseInfoArray);
+  const productBaseInfoList = ref([] as ProductIdName[]);
   const formRef = ref();
   const dataList = ref([]);
   const loading = ref(true);

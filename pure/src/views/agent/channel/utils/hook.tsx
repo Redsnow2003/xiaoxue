@@ -9,7 +9,8 @@ import {
 } from "@/api/agent";
 import { getSupplierSimpleList } from "@/api/supplier";
 import { reactive, ref, onMounted, h, type Ref } from "vue";
-import type { AgentSimpleItem, FormItemProps } from "../utils/types";
+import type { FormItemProps } from "../utils/types";
+import type { AgentIdName } from "@/api/types";
 import type { SupplierIdName } from "@/api/types";
 import { deviceDetection } from "@pureadmin/utils";
 import { useRoute } from "vue-router";
@@ -28,7 +29,7 @@ export function useCategory(tableRef: Ref) {
   const formRef = ref();
   const loading = ref(true);
   const selectedNum = ref(0);
-  const agentItemLists = ref([] as AgentSimpleItem[]);
+  const agentItemLists = ref([] as AgentIdName[]);
   const supplierItemLists = ref([] as SupplierIdName[]);
   const route = useRoute();
   const disabled = ref(false);
