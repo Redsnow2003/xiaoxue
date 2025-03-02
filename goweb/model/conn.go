@@ -11,10 +11,7 @@ import (
 // 创建mysql连接
 func newMysqlConn() *gorm.DB {
 	//读取配置文件
-	configBase, err := config.InitConfig()
-	if err != nil {
-		logger.Fatalf("读取配置信息失败：%v", err)
-	}
+	configBase := config.GetConfig()
 	//连接数据库
 	username := configBase.MySqlnd.Username
 	password := configBase.MySqlnd.Password
@@ -36,10 +33,7 @@ func newMysqlConn() *gorm.DB {
 // 创建历史库连接
 func newMysqlConnHistory() *gorm.DB {
 	//读取配置文件
-	configBase, err := config.InitConfig()
-	if err != nil {
-		logger.Fatalf("读取配置信息失败：%v", err)
-	}
+	configBase := config.GetConfig()
 	//连接数据库
 	username := configBase.MySqlnd.Username
 	password := configBase.MySqlnd.Password

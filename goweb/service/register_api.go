@@ -76,10 +76,7 @@ func Init() *gin.Engine {
 func StartApi() {
 	// 初始化路由
 	r := Init()
-	configBase, err := config.InitConfig()
-	if err != nil {
-		logger.Fatalf("Get config failed! err: #%v", err)
-	}
+	configBase := config.GetConfig()
 	fmt.Printf("Listening and serving HTTP on %s\n", configBase.Webapi.Uri)
 	if err := r.Run(configBase.Webapi.Uri); err != nil {
 		logger.Fatalf("Run web server failed! err: #%v", err)

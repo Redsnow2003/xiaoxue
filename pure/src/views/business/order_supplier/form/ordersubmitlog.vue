@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { onMounted, ref, h } from "vue";
-import { agentOrderSubmitLog } from "@/api/order";
+import { supplierOrderSubmitLog } from "@/api/order";
 const props = defineProps({
-  order_id: {
+  supplier_order_id: {
     type: Number,
     default: 0
   }
 });
 
 const ruleFormRef = ref();
-const order_id = ref(props.order_id);
+const supplier_order_id = ref(props.supplier_order_id);
 const dataList = ref([]);
 const columns: TableColumnList = [
   {
-    label: "订单号",
-    prop: "order_id"
+    label: "供货单号",
+    prop: "supplier_order_id"
   },
   {
     label: "请求头",
@@ -55,9 +55,9 @@ function getRef() {
 
 async function onSearch() {
   var requestData = {
-    order_id: order_id.value
+    supplier_order_id: supplier_order_id.value
   };
-  const { data } = await agentOrderSubmitLog(requestData);
+  const { data } = await supplierOrderSubmitLog(requestData);
   console.log(data);
   dataList.value = data;
 }

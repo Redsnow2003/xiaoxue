@@ -38,10 +38,7 @@ func main() {
 func init() {
 	// 初始化配置文件
 	var err error
-	configInfo, err = config.InitConfig()
-	if err != nil {
-		fmt.Printf("Init config err %v", err)
-	}
+	configInfo := config.GetConfig()
 	// 为日志配置文件赋值
 	configInit := logger.LogConfig{
 		EnableConsole:     configInfo.Log.EnableConsole,

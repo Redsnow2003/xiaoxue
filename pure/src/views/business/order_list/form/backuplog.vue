@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, h } from "vue";
 import { backupSubmitLog, deleteBackupSubmitLog } from "@/api/order";
-import { pa } from "element-plus/es/locale/index.mjs";
 const props = defineProps({
   order_id: {
     type: Number,

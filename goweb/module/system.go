@@ -3,6 +3,7 @@ package module
 import (
 	"main/common"
 	"main/model"
+	"main/config"
 	"net/http"
 	"strings"
 	"time"
@@ -15,6 +16,38 @@ func RegisterDepartmentRoutes(router *gin.Engine) {
 	router.POST("/dept", addDept)
 	router.PUT("/dept", updateDept)
 	router.DELETE("/dept", deleteDept)
+	router.POST("/system-config", getSystemConfig)
+	router.PUT("/system-config", updateSystemConfig)
+}
+
+// @Tags 配置
+// @Summary 更新系统配置信息
+func updateSystemConfig(c *gin.Context) {
+	var conf config.Config
+	err := c.ShouldBindJSON(&conf.System)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	config.SaveConfig()
+	// Implement logic to get departments
+	c.JSON(http.StatusOK,
+		gin.H{
+			"success": true,
+			"message": "update system config",
+		})
+}
+
+// @Tags 配置
+// @Summary 获取系统配置信息
+func getSystemConfig(c *gin.Context) {
+	conf := config.GetConfig()
+	// Implement logic to get departments
+	c.JSON(http.StatusOK,
+		gin.H{
+			"success": true,
+			"data":    conf.System,
+		})
 }
 
 // @Tags 部门

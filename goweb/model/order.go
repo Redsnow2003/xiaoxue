@@ -137,3 +137,158 @@ type Order_notify_log struct {
 func (Order_notify_log) TableName() string {
 	return "order_notify_log"
 }
+
+// order_supplier_submit_log 供货单提单日志表
+type Order_supplier_submit_log struct {
+	ID                uint64    `gorm:"column:id;primaryKey;autoIncrement;type:bigint unsigned" json:"id"`      // 自增主键
+	Supplier_order_id uint64    `gorm:"column:supplier_order_id;type:bigint unsigned" json:"supplier_order_id"` // 供应商订单ID
+	Request_header    string    `gorm:"column:request_header;type:varchar(1024)" json:"request_header"`         // 请求头信息
+	Request_params    string    `gorm:"column:request_params;type:varchar(1024)" json:"request_params"`         // 请求参数
+	Request_ip        string    `gorm:"column:request_ip;type:varchar(255)" json:"request_ip"`                  // 请求方IP
+	Request_time      time.Time `gorm:"column:request_time;type:datetime" json:"request_time"`                  // 请求时间
+	Response_context  string    `gorm:"column:response_context;type:varchar(1024)" json:"response_context"`     // 响应内容
+	Response_time     time.Time `gorm:"column:response_time;type:datetime" json:"response_time"`                // 响应时间
+	Remark            string    `gorm:"column:remark;type:varchar(255)" json:"remark"`                          // 备注
+}
+
+// TableName 表名
+func (Order_supplier_submit_log) TableName() string {
+	return "order_supplier_submit_log"
+}
+
+// order_supplier_query_log 供货单查单日志表
+type Order_supplier_query_log struct {
+	ID                uint64    `gorm:"column:id;primaryKey;autoIncrement;type:bigint unsigned" json:"id"`      // 自增主键
+	Supplier_order_id uint64    `gorm:"column:supplier_order_id;type:bigint unsigned" json:"supplier_order_id"` // 供应商订单ID
+	Request_header    string    `gorm:"column:request_header;type:varchar(1024)" json:"request_header"`         // 请求头信息
+	Request_params    string    `gorm:"column:request_params;type:varchar(1024)" json:"request_params"`         // 请求参数
+	Request_ip        string    `gorm:"column:request_ip;type:varchar(255)" json:"request_ip"`                  // 请求方IP
+	Request_time      time.Time `gorm:"column:request_time;type:datetime" json:"request_time"`                  // 请求时间
+	Response_context  string    `gorm:"column:response_context;type:varchar(1024)" json:"response_context"`     // 响应内容
+	Response_time     time.Time `gorm:"column:response_time;type:datetime" json:"response_time"`                // 响应时间
+	Remark            string    `gorm:"column:remark;type:varchar(255)" json:"remark"`                          // 备注
+}
+
+// TableName 表名
+func (Order_supplier_query_log) TableName() string {
+	return "order_supplier_query_log"
+}
+
+// order_supplier_cancel_log 供货单撤单日志表
+type Order_supplier_cancel_log struct {
+	ID                uint64    `gorm:"column:id;primaryKey;autoIncrement;type:bigint unsigned" json:"id"`      // 自增主键
+	Supplier_order_id uint64    `gorm:"column:supplier_order_id;type:bigint unsigned" json:"supplier_order_id"` // 供应商订单ID
+	Request_header    string    `gorm:"column:request_header;type:varchar(1024)" json:"request_header"`         // 请求头信息
+	Request_params    string    `gorm:"column:request_params;type:varchar(1024)" json:"request_params"`         // 请求参数
+	Request_ip        string    `gorm:"column:request_ip;type:varchar(255)" json:"request_ip"`                  // 请求方IP
+	Request_time      time.Time `gorm:"column:request_time;type:datetime" json:"request_time"`                  // 请求时间
+	Response_context  string    `gorm:"column:response_context;type:varchar(1024)" json:"response_context"`     // 响应内容
+	Response_time     time.Time `gorm:"column:response_time;type:datetime" json:"response_time"`                // 响应时间
+	Remark            string    `gorm:"column:remark;type:varchar(255)" json:"remark"`                          // 备注
+}
+
+// TableName 表名
+func (Order_supplier_cancel_log) TableName() string {
+	return "order_supplier_cancel_log"
+}
+
+// order_supplier_callback_log 供货单回调日志表
+type Order_supplier_callback_log struct {
+	ID                uint64    `gorm:"column:id;primaryKey;autoIncrement;type:bigint unsigned" json:"id"`      // 自增主键
+	Supplier_order_id uint64    `gorm:"column:supplier_order_id;type:bigint unsigned" json:"supplier_order_id"` // 供应商订单ID
+	Callback_ip       string    `gorm:"column:callback_ip;type:varchar(255)" json:"callback_ip"`                // 回调IP
+	Callback_context  string    `gorm:"column:callback_context;type:varchar(1024)" json:"callback_context"`     // 回调内容
+	Callback_time     time.Time `gorm:"column:callback_time;type:datetime" json:"callback_time"`                // 回调时间
+	Response_context  string    `gorm:"column:response_context;type:varchar(1024)" json:"response_context"`     // 响应内容
+	Remark            string    `gorm:"column:remark;type:varchar(255)" json:"remark"`                          // 备注
+}
+
+// TableName 表名
+func (Order_supplier_callback_log) TableName() string {
+	return "order_supplier_callback_log"
+}
+
+// order_agent_intercept 代理商拦截订单表
+type Order_agent_intercept struct {
+	ID                   uint64    `gorm:"column:id;primaryKey;autoIncrement;type:bigint unsigned" json:"id"`          // 自增主键
+	Down_id              string    `gorm:"column:down_id;type:varchar(255)" json:"down_id"`                            // 第三方订单号
+	Agent_id             uint64    `gorm:"column:agent_id;type:bigint unsigned" json:"agent_id"`                       // 代理商ID
+	Agent_name           string    `gorm:"column:agent_name;type:varchar(255)" json:"agent_name"`                      // 代理商名称
+	Create_time          time.Time `gorm:"column:create_time;type:datetime" json:"create_time"`                        // 创建时间
+	Product_id           uint64    `gorm:"column:product_id;type:bigint unsigned" json:"product_id"`                   // 商品ID
+	Product_name         string    `gorm:"column:product_name;type:varchar(255)" json:"product_name"`                  // 商品名称
+	Recharge_number      string    `gorm:"column:recharge_number;type:varchar(255)" json:"recharge_number"`            // 充值号码
+	Check_price          float64   `gorm:"column:check_price;type:double(10,2)" json:"check_price"`                    // 核对价格
+	Request_ip           string    `gorm:"column:request_ip;type:varchar(255)" json:"request_ip"`                      // 请求方IP
+	Request_time         time.Time `gorm:"column:request_time;type:datetime" json:"request_time"`                      // 请求时间
+	Request_params       string    `gorm:"column:request_params;type:varchar(1024)" json:"request_params"`             // 请求参数
+	Response_information string    `gorm:"column:response_information;type:varchar(1024)" json:"response_information"` // 响应信息
+	Response_time        time.Time `gorm:"column:response_time;type:datetime" json:"response_time"`                    // 响应时间
+	Remark               string    `gorm:"column:remark;type:varchar(255)" json:"remark"`                              // 备注
+}
+
+// TableName 表名
+func (Order_agent_intercept) TableName() string {
+	return "order_agent_intercept"
+}
+
+// Order_Cache 订单表
+type Order_cache struct {
+	ID               uint64    `gorm:"column:id;primaryKey;autoIncrement;type:bigint unsigned" json:"id"` // 自增主键
+	Business_type    uint8     `gorm:"column:business_type;type:tinyint" json:"business_type"`            // 业务类型
+	Down_id          string    `gorm:"column:down_id;type:varchar(255)" json:"down_id"`                   // 第三方订单号
+	Agent_id         uint64    `gorm:"column:agent_id;type:bigint unsigned" json:"agent_id"`              // 代理商ID
+	Agent_name       string    `gorm:"column:agent_name;type:varchar(255)" json:"agent_name"`             // 代理商名称
+	Product_category uint8     `gorm:"column:product_category;type:tinyint" json:"product_category"`      // 商品类别
+	Product_id       uint64    `gorm:"column:product_id;type:bigint unsigned" json:"product_id"`          // 商品ID
+	Product_name     string    `gorm:"column:product_name;type:varchar(255)" json:"product_name"`         // 商品名称
+	Base_price       float64   `gorm:"column:base_price;type:double(10,2)" json:"base_price"`             // 基础价格
+	Operator         uint8     `gorm:"column:operator;type:tinyint" json:"operator"`                      // 运营商类型
+	Agent_discount   float64   `gorm:"column:agent_discount;type:double(10,2)" json:"agent_discount"`     // 代理商折扣
+	Count            uint32    `gorm:"column:count;type:int" json:"count"`                                // 数量
+	Recharge_number  string    `gorm:"column:recharge_number;type:varchar(255)" json:"recharge_number"`   // 充值号码
+	Location         string    `gorm:"column:location;type:varchar(255)" json:"location"`                 // 所在地区
+	Status           uint8     `gorm:"column:status;type:tinyint" json:"status"`                          // 状态
+	Is_timeout       uint8     `gorm:"column:is_timeout;type:tinyint" json:"is_timeout"`                  // 是否超时
+	Timeout          uint32    `gorm:"column:timeout;type:int" json:"timeout"`                            // 超时时长
+	Is_cancel        uint8     `gorm:"column:is_cancel;type:tinyint" json:"is_cancel"`                    // 是否取消
+	Create_time      time.Time `gorm:"column:create_time;type:datetime" json:"create_time"`               // 创建时间
+	Finish_time      time.Time `gorm:"column:finish_time;type:datetime" json:"finish_time"`               // 完成时间
+	Notify_status    uint8     `gorm:"column:notify_status;type:tinyint" json:"notify_status"`            // 回调状态
+	Special_params   string    `gorm:"column:special_params;type:varchar(255)" json:"special_params"`     // 特殊参数
+	Remark           string    `gorm:"column:remark;type:varchar(255)" json:"remark"`                     // 备注
+}
+
+// TableName 表名
+func (Order_cache) TableName() string {
+	return "order_cache"
+}
+
+// 充值号码表
+type Recharge_number struct {
+	ID               uint64    `gorm:"column:id;primaryKey;autoIncrement;type:bigint unsigned" json:"id"` // 自增主键
+	Base_price       float64   `gorm:"column:base_price;type:double(10,2)" json:"base_price"`             // 基础价格
+	Operator         uint8     `gorm:"column:operator;type:tinyint" json:"operator"`                      // 运营商类型
+	Recharge_number  string    `gorm:"column:recharge_number;type:varchar(255)" json:"recharge_number"`   // 充值号码
+	Location         string    `gorm:"column:location;type:varchar(255)" json:"location"`                 // 所在地区
+	Status           uint8     `gorm:"column:status;type:tinyint" json:"status"`                          // 状态
+	Create_time      time.Time `gorm:"column:create_time;type:datetime" json:"create_time"`               // 创建时间
+	Finish_time      time.Time `gorm:"column:finish_time;type:datetime" json:"finish_time"`               // 完成时间
+}
+
+// TableName 表名
+func (Recharge_number) TableName() string {
+	return "order_list"
+}
+
+// order_number_blacklist 充值号码黑名单表
+type Order_number_blacklist struct {
+	ID               uint64    `gorm:"column:id;primaryKey;autoIncrement;type:bigint unsigned" json:"id"` // 自增主键
+	Recharge_number  string    `gorm:"column:recharge_number;type:varchar(255)" json:"recharge_number"`   // 充值号码
+	Remark		   string    `gorm:"column:remark;type:varchar(255)" json:"remark"`                     // 备注
+}
+
+// TableName 表名
+func (Order_number_blacklist) TableName() string {
+	return "order_number_blacklist"
+}

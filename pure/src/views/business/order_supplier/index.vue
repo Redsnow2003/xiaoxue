@@ -40,7 +40,7 @@ const iconClass = computed(() => {
 const formRef = ref();
 const tableRef = ref();
 const contentRef = ref();
-const { handleAgentproduct } = useProductHandlers();
+const { handleSupplierProduct } = useProductHandlers();
 const {
   form,
   loading,
@@ -60,8 +60,7 @@ const {
   handleChangeRemark,
   handleQueryUpOrder,
   handleFailureToSuccess,
-  handleBackupSubmit,
-  handleSupplierProduct,
+  handleBackupSubmitLog,
   handleOrderSubmitLog,
   handleOrderQueryLog,
   handleOrderCancelLog,
@@ -420,9 +419,9 @@ onMounted(async () => {
                     </el-dropdown-item>
                     <el-dropdown-item
                       :icon="useRenderIcon(EditPen)"
-                      @click="handleBackupSubmit(row)"
+                      @click="handleBackupSubmitLog(row)"
                     >
-                      备用通道重新提交
+                      备用通道重新提交记录
                     </el-dropdown-item>
                     <el-dropdown-item
                       :icon="useRenderIcon(EditPen)"

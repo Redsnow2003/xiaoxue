@@ -185,3 +185,86 @@ export const deleteBackupSubmitLog = (data: object) => {
     }
   );
 };
+
+/** 查询上游订单信息 */
+export const queryUpOrderInfo = (data: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/query-up-order-info"), {
+    data
+  });
+};
+
+/** 供货单提交日志 */
+export const supplierOrderSubmitLog = (data: object) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi("/supplier-order-submit-log"),
+    {
+      data
+    }
+  );
+};
+
+/** 供货单查询日志 */
+export const supplierOrderQueryLog = (data: object) => {
+  return http.request<Result>("post", baseUrlApi("/supplier-order-query-log"), {
+    data
+  });
+};
+
+/** 供货单撤单日志 */
+export const supplierOrderCancelLog = (data: object) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi("/supplier-order-cancel-log"),
+    {
+      data
+    }
+  );
+};
+
+/** 供货单回调日志 */
+export const supplierOrderCallbackLog = (data: object) => {
+  return http.request<Result>(
+    "post",
+    baseUrlApi("/supplier-order-callback-log"),
+    {
+      data
+    }
+  );
+};
+
+/** 获取拦截单信息 */
+export const getInterceptOrderInfo = (data: object) => {
+  return http.request<ResultTable>(
+    "post",
+    baseUrlApi("/intercept-order-info"),
+    {
+      data
+    }
+  );
+};
+
+/** 获取缓存单信息列表 */
+export const getCacheOrderList = (data: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/cache-order-list"), {
+    data
+  });
+};
+
+/** 号码黑名单查询 */
+export const getNumberBlackList = (data: object) => {
+  return http.request<ResultTable>("post", baseUrlApi("/number-black-list"), {
+    data
+  });
+};
+
+/** 删除号码黑名单 */
+export const deleteNumberBlackList = (data: object) => {
+  return http.request<Result>(
+    "delete",
+    baseUrlApi("/delete-number-black-list"),
+    {
+      data
+    }
+  );
+};

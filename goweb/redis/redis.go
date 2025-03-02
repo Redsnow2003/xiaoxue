@@ -13,10 +13,7 @@ var RedisPool *redis.Pool
 func init() {
 
 	// 读取配置文件
-	configBase, err := config.InitConfig()
-	if err != nil {
-		fmt.Printf("读取配置信息失败：%v", err)
-	}
+	configBase := config.GetConfig()
 	// 创建redis连接池
 	RedisPool = &redis.Pool{
 		MaxIdle: 8,				// 最大空闲连接数

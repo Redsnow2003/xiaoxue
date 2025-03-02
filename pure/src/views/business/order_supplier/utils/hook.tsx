@@ -11,7 +11,7 @@ import OrderCallbackLogForm from "../form/ordercallbacklog.vue";
 import OrderCancelLogForm from "../form/ordercancellog.vue";
 import { addDialog } from "@/components/ReDialog";
 import type {
-  FormItemProps,
+  OrederSupplierItemProps,
   CategoryProps,
   ChangeRemarkProps,
   BatchBackupProps
@@ -26,9 +26,8 @@ import { type Ref, reactive, ref, onMounted, h } from "vue";
 import { useRouter } from "vue-router";
 import {
   BusinessTypeList,
-  NotifyStatusList,
   OperatorListAll,
-  OrderStatusList
+  SupplierOrderStatusList
 } from "@/api/constdata";
 import { getAgentSimpleList } from "@/api/agent";
 import {
@@ -45,6 +44,7 @@ import {
   getProductCategoryList,
   getProductInformationIdAndName
 } from "@/api/product";
+import { ElMessageBox } from "element-plus";
 
 export function useCategory(tableRef: Ref) {
   const form = reactive({
@@ -101,21 +101,31 @@ export function useCategory(tableRef: Ref) {
     {
       label: "订单号|供货单号|上游单号",
       prop: "id",
+      minWidth: 150,
       cellRenderer: ({ row }) => (
         <span>
+          {row.order_id}
+          <br />
+          <hr style="border-color: lightgray;" />
           {row.id}
           <br />
-          {row.down_id}
+          <hr style="border-color: lightgray;" />
+          {row.up_id}
         </span>
       )
     },
     {
       label: "代理商",
       prop: "agent_id",
+      minWidth: 150,
       cellRenderer: ({ row }) => (
-        <span>
+        <span
+          style="cursor: pointer;color: #409EFF; text-decoration: underline;"
+          onClick={() => gotoAgentInfo(row)}
+        >
           {row.agent_id}
           <br />
+          <hr style="border-color: lightgray;" />
           {row.agent_name}
         </span>
       )
@@ -123,6 +133,7 @@ export function useCategory(tableRef: Ref) {
     {
       label: "代理折扣|数量|订单总价",
       prop: "agent_discount",
+      minWidth: 150,
       cellRenderer: ({ row }) => (
         <span>
           {row.agent_discount}
@@ -136,10 +147,30 @@ export function useCategory(tableRef: Ref) {
       )
     },
     {
+      label: "供货商",
+      prop: "supplier_id",
+      minWidth: 150,
+      cellRenderer: ({ row }) => (
+        <span
+          style="cursor: pointer;color: #409EFF; text-decoration: underline;"
+          onClick={() => gotoAgentInfo(row)}
+        >
+          {row.supplier_id}
+          <br />
+          <hr style="border-color: lightgray;" />
+          {row.supplier_name}
+        </span>
+      )
+    },
+    {
       label: "产品ID|产品名称|基础价|运营商",
       prop: "product_id",
+      minWidth: 150,
       cellRenderer: ({ row }) => (
-        <span>
+        <span
+          style="cursor: pointer;color: #409EFF; text-decoration: underline;"
+          onClick={() => gotoProductInfo(row)}
+        >
           {row.product_id}
           <br />
           <hr style="border-color: lightgray;" />
@@ -154,8 +185,25 @@ export function useCategory(tableRef: Ref) {
       )
     },
     {
+      label: "供货折扣|数量|供货总价",
+      prop: "supplier_discount",
+      minWidth: 150,
+      cellRenderer: ({ row }) => (
+        <span>
+          {row.supplier_discount}
+          <br />
+          <hr style="border-color: lightgray;" />
+          {row.count}
+          <br />
+          <hr style="border-color: lightgray;" />
+          {(row.base_price * row.supplier_discount * row.count).toFixed(2)}
+        </span>
+      )
+    },
+    {
       label: "充值号码|运营商|归属地",
       prop: "recharge_number",
+      minWidth: 150,
       cellRenderer: ({ row }) => (
         <span>
           {row.recharge_number}
@@ -164,33 +212,31 @@ export function useCategory(tableRef: Ref) {
           {row.operator}
           <br />
           <hr style="border-color: lightgray;" />
-          {location}
+          {row.location}
         </span>
       )
     },
     {
-      label: "订单状态",
+      label: "订单时间",
+      minWidth: 150,
+      prop: "order_time"
+    },
+    {
+      label: "供货单状态",
       prop: "status",
       cellRenderer: ({ row }) => (
         <span>
-          {OrderStatusList.find(item => item.value === row.status)?.label}
+          {
+            SupplierOrderStatusList.find(item => item.value === row.status)
+              ?.label
+          }
         </span>
       )
-    },
-    {
-      label: "是否超时",
-      prop: "is_timeout",
-      cellRenderer: ({ row }) => (
-        <span>{row.is_timeout === 1 ? "是" : "否"}</span>
-      )
-    },
-    {
-      label: "超时时间(秒)",
-      prop: "timeout"
     },
     {
       label: "创建时间|完成时间",
       prop: "create_time",
+      minWidth: 150,
       cellRenderer: ({ row }) => (
         <span>
           {row.create_time}
@@ -203,25 +249,27 @@ export function useCategory(tableRef: Ref) {
     {
       label: "用时",
       prop: "finish_time",
+      minWidth: 150,
       cellRenderer: ({ row }) => (
         <span>{timeDiff(row.create_time, row.finish_time)}</span>
       )
     },
     {
-      label: "通知状态",
-      prop: "notify_status",
-      cellRenderer: ({ row }) => (
-        <span>
-          {
-            NotifyStatusList.find(item => item.value === row.notify_status)
-              ?.label
-          }
-        </span>
-      )
+      label: "上游信息",
+      prop: "up_information"
+    },
+    {
+      label: "更新时间",
+      prop: "update_time"
     },
     {
       label: "备注",
       prop: "remark"
+    },
+    {
+      label: "备用通道重试",
+      prop: "is_backup",
+      cellRenderer: ({ row }) => (row.is_backup ? "是" : "否")
     },
     {
       label: "操作",
@@ -275,6 +323,30 @@ export function useCategory(tableRef: Ref) {
     formEl.resetFields();
     onSearch();
   };
+
+  //点击跳转到对应的代理商页面
+  function gotoAgentInfo(row?: OrederSupplierItemProps) {
+    const router = useRouter();
+    console.log("handleAgentproduct", row);
+    if (row && row.id) {
+      // 携带参数 row.id 跳转到产品配置页面
+      router.push({});
+    } else {
+      console.error("Row or Row ID is missing");
+    }
+  }
+
+  //点击跳转到对应产品配置页面
+  function gotoProductInfo(row?: OrederSupplierItemProps) {
+    const router = useRouter();
+    console.log("handleAgentproduct", row);
+    if (row && row.id) {
+      // 携带参数 row.id 跳转到产品配置页面
+      router.push({});
+    } else {
+      console.error("Row or Row ID is missing");
+    }
+  }
 
   /** 高亮当前权限选中行 */
   function rowStyle({ row: { id } }) {
@@ -410,7 +482,7 @@ export function useCategory(tableRef: Ref) {
     onSearch();
   }
 
-  async function handleLookOrder(row?: FormItemProps) {
+  async function handleLookOrder(row?: OrederSupplierItemProps) {
     addDialog({
       title: `相关供货单列表`,
       props: {
@@ -428,12 +500,13 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleQueryUpOrder(row?: FormItemProps) {
+  function handleQueryUpOrder(row?: OrederSupplierItemProps) {
     // 查看供应商订单的逻辑
     addDialog({
-      title: `相关供货单列表`,
+      title: `上游订单信息`,
       props: {
-        order_id: row.id
+        up_id: row.up_id,
+        supplier_id: row.supplier_id
       },
       width: "60%",
       draggable: true,
@@ -441,22 +514,32 @@ export function useCategory(tableRef: Ref) {
       fullscreenIcon: true,
       closeOnClickModal: false,
       contentRenderer: () =>
-        h(OrderUpInfoForm, { ref: formRef, order_id: null }),
+        h(OrderUpInfoForm, { up_id: null, supplier_id: null }),
       beforeSure: done => {
         done(); // 关闭弹框
       }
     });
   }
 
-  async function handleFailureToSuccess(row?: FormItemProps) {
-    var supplierOrderId = {
-      supplier_order_id: row.id
-    };
-    await supplierOrderFailToSuccess(supplierOrderId);
-    onSearch();
+  function handleFailureToSuccess(row?: OrederSupplierItemProps) {
+    // 通知状态的逻辑
+    ElMessageBox.confirm(`是否确认将供货单${row.id}状态改为成功`, "确认", {
+      confirmButtonText: "确认",
+      cancelButtonText: "取消",
+      type: "warning"
+    })
+      .then(() => {
+        var supplierOrderId = {
+          id: row.id
+        };
+        supplierOrderFailToSuccess(supplierOrderId).then(() => {
+          onSearch();
+        });
+      })
+      .catch(() => {});
   }
 
-  function handleChangeRemark(row?: FormItemProps) {
+  function handleChangeRemark(row?: OrederSupplierItemProps) {
     // 修改备注的逻辑
     addDialog({
       title: `修改订单备注`,
@@ -465,7 +548,7 @@ export function useCategory(tableRef: Ref) {
           /** 订单ID */
           order_id: row.id,
           /** 备注 */
-          remark: ""
+          remark: row.remark
         }
       },
       width: "30%",
@@ -492,12 +575,12 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleBackupSubmit(row?: FormItemProps) {
+  function handleBackupSubmitLog(row?: OrederSupplierItemProps) {
     // 备份日志的逻辑
     addDialog({
       title: `备用通道重新提交记录`,
       props: {
-        order_id: row.id
+        order_id: row.order_id
       },
       width: "60%",
       draggable: true,
@@ -511,17 +594,12 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleSupplierProduct(row?: FormItemProps) {
-    // 提交日志的逻辑
-    console.log("handleSupplierProduct", row);
-  }
-
-  function handleOrderSubmitLog(row?: FormItemProps) {
+  function handleOrderSubmitLog(row?: OrederSupplierItemProps) {
     // 查询日志的逻辑
     addDialog({
       title: `提单日志`,
       props: {
-        order_id: row.id
+        supplier_order_id: row.id
       },
       width: "60%",
       draggable: true,
@@ -529,19 +607,19 @@ export function useCategory(tableRef: Ref) {
       fullscreenIcon: true,
       closeOnClickModal: false,
       contentRenderer: () =>
-        h(OrderSubmitLogForm, { ref: formRef, order_id: null }),
+        h(OrderSubmitLogForm, { ref: formRef, supplier_order_id: null }),
       beforeSure: done => {
         done(); // 关闭弹框
       }
     });
   }
 
-  function handleOrderQueryLog(row?: FormItemProps) {
+  function handleOrderQueryLog(row?: OrederSupplierItemProps) {
     // 通知日志的逻辑
     addDialog({
-      title: `提单日志`,
+      title: `查单日志`,
       props: {
-        order_id: row.id
+        supplier_order_id: row.id
       },
       width: "60%",
       draggable: true,
@@ -549,17 +627,17 @@ export function useCategory(tableRef: Ref) {
       fullscreenIcon: true,
       closeOnClickModal: false,
       contentRenderer: () =>
-        h(OrderQueryLogForm, { ref: formRef, order_id: null }),
+        h(OrderQueryLogForm, { ref: formRef, supplier_order_id: null }),
       beforeSure: done => {
         done(); // 关闭弹框
       }
     });
   }
 
-  function handleOrderCallbackLog(row?: FormItemProps) {
+  function handleOrderCallbackLog(row?: OrederSupplierItemProps) {
     // 通知日志的逻辑
     addDialog({
-      title: `提单日志`,
+      title: `回调日志`,
       props: {
         order_id: row.id
       },
@@ -576,12 +654,12 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleOrderCancelLog(row?: FormItemProps) {
+  function handleOrderCancelLog(row?: OrederSupplierItemProps) {
     // 通知日志的逻辑
     addDialog({
-      title: `提单日志`,
+      title: `撤单日志`,
       props: {
-        order_id: row.id
+        supplier_order_id: row.id
       },
       width: "60%",
       draggable: true,
@@ -589,7 +667,7 @@ export function useCategory(tableRef: Ref) {
       fullscreenIcon: true,
       closeOnClickModal: false,
       contentRenderer: () =>
-        h(OrderCancelLogForm, { ref: formRef, order_id: null }),
+        h(OrderCancelLogForm, { ref: formRef, supplier_order_id: null }),
       beforeSure: done => {
         done(); // 关闭弹框
       }
@@ -616,8 +694,7 @@ export function useCategory(tableRef: Ref) {
     handleChangeRemark,
     handleQueryUpOrder,
     handleFailureToSuccess,
-    handleBackupSubmit,
-    handleSupplierProduct,
+    handleBackupSubmitLog,
     handleOrderSubmitLog,
     handleOrderQueryLog,
     handleOrderCancelLog,
@@ -638,24 +715,23 @@ export function useCategory(tableRef: Ref) {
 function useProductHandlers() {
   const router = useRouter();
 
-  function handleAgentproduct(row?: FormItemProps) {
+  function handleSupplierProduct(row?: OrederSupplierItemProps) {
     console.log("handleAgentChannel", row);
     if (row && row.id) {
       // 携带参数 row.id 跳转到产品配置页面
       router.push({
-        path: "/agent/productchannel/index",
+        path: "/supplier/product/index",
         query: {
-          agent_id: row.id,
-          agent_name: row.name
+          product_id: row.product_id,
+          product_name: row.product_name
         }
       });
     } else {
-      console.error("Row or Row ID is missing");
     }
   }
 
   return {
-    handleAgentproduct
+    handleSupplierProduct
   };
 }
 export { useProductHandlers };

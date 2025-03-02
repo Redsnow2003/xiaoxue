@@ -437,3 +437,11 @@ func getSupplierTemplateJson(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"success": true, "data": jsonObj})
 }
+
+// 利用供应商id，查询对应的供应商模板
+func getSupplierTemplateJsonString(supplierId uint64) string {
+	db := model.Db
+	var supplier model.Supplier_account
+	db.Select("template_json").Where("id = ?", supplierId).First(&supplier)
+	return supplier.Up_template
+}

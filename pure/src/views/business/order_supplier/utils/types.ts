@@ -1,40 +1,58 @@
 // 虽然字段很少 但是抽离出来 后续有扩展字段需求就很方便了
-interface FormItemProps {
-  /** 代理商ID */
+interface OrederSupplierItemProps {
+  /** 订单ID */
   id: number;
+  /** 订单号 */
+  order_id: number;
+  /** 业务类型 */
+  business_type: number;
+  /** 上游ID */
+  up_id: string;
+  /** 代理商ID */
+  agent_id: number;
   /** 代理商名称 */
-  name: string;
-  /** 代理商简称 */
-  nickname: string;
-  /** 代理商部门 */
-  dept: number;
-  /** 代理商电话 */
-  phone: string;
-  /** 代理商邮箱 */
-  email: string;
-  /** 密钥 */
-  secret_key: string;
-  /** 通知地址 */
-  notification_address: string;
-  /** 通知方式 */
-  notification_method: number;
-  /** 客户 */
-  customer: string;
-  /** 状态 */
-  status: number;
-  /** 资金余额 */
-  fund_balance: number;
-  /** 授信余额 */
-  credit_balance: number;
-  /** 冻结金额 */
-  frozen_amount: number;
-  /** 缓存可用金额 */
-  cache_amount: number;
+  agent_name: string;
+  /** 代理商折扣 */
+  agent_discount: number;
+  /** 数量 */
+  count: number;
+  /** 供应商ID */
+  supplier_id: number;
+  /** 供应商名称 */
+  supplier_name: string;
+  /** 产品ID */
+  product_id: number;
+  /** 产品名称 */
+  product_name: string;
+  /** 基础价格 */
+  base_price: number;
+  /** 运营商 */
+  operator: number;
+  /** 供应商折扣 */
+  supplier_discount: number;
+  /** 充值号码 */
+  recharge_number: string;
+  /** 归属地 */
+  location: string;
+  /** 订单时间 */
+  order_time: string;
+  /** 订单状态 */
+  status: string;
+  /** 创建时间 */
+  create_time: string;
+  /** 完成时间 */
+  finish_time: string;
+  /** 上游信息 */
+  up_information: string;
+  /** 更新时间 */
+  update_time: string;
   /** 备注 */
   remark: string;
+  /** 是否备份 */
+  is_backup: boolean;
 }
-interface FormProps {
-  formInline: FormItemProps;
+interface OrederSupplierFormProps {
+  formInline: OrederSupplierItemProps;
 }
 
 interface BatchStatusProps {
@@ -114,8 +132,8 @@ interface CategoryItemProps {
 interface CategoryProps extends Array<CategoryItemProps> {}
 
 export type {
-  FormItemProps,
-  FormProps,
+  OrederSupplierItemProps,
+  OrederSupplierFormProps,
   ChangeFundFormProps,
   TemplateInfoItem,
   ChangeFundFormItemProps,

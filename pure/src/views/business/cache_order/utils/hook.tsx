@@ -9,7 +9,7 @@ import OrderQueryLogForm from "../form/orderquerylog.vue";
 import OrderNotifyLogForm from "../form/ordernotifylog.vue";
 import { addDialog } from "@/components/ReDialog";
 import type {
-  FormItemProps,
+  OrderItemProps,
   CategoryProps,
   BatchStatusProps,
   BatchBackupProps,
@@ -31,7 +31,7 @@ import {
 } from "@/api/constdata";
 import { getAgentSimpleList } from "@/api/agent";
 import {
-  getOrderList,
+  getCacheOrderList,
   batchBackupCancel,
   batchBackupSubmit,
   batchOrderCancel,
@@ -41,6 +41,10 @@ import {
   batchUpdateOrderStatusRemark,
   updateOrderRemark
 } from "@/api/order";
+import {
+  getProductCategoryList,
+  getProductInformationIdAndName
+} from "@/api/product";
 
 export function useCategory(tableRef: Ref) {
   const form = reactive({
@@ -99,6 +103,7 @@ export function useCategory(tableRef: Ref) {
         <span>
           {row.id}
           <br />
+          <hr style="border-color: lightgray;" />
           {row.down_id}
         </span>
       )
@@ -110,6 +115,7 @@ export function useCategory(tableRef: Ref) {
         <span>
           {row.agent_id}
           <br />
+          <hr style="border-color: lightgray;" />
           {row.agent_name}
         </span>
       )
@@ -155,10 +161,10 @@ export function useCategory(tableRef: Ref) {
           {row.recharge_number}
           <br />
           <hr style="border-color: lightgray;" />
-          {row.operator}
+          {OperatorListAll.find(item => item.value === row.operator)?.label}
           <br />
           <hr style="border-color: lightgray;" />
-          {location}
+          {row.location}
         </span>
       )
     },
@@ -252,7 +258,7 @@ export function useCategory(tableRef: Ref) {
   async function onSearch() {
     loading.value = true;
     var params = { ...form, ...pagination };
-    const { data } = await getOrderList(params);
+    const { data } = await getCacheOrderList(params);
     dataList.value = data.list;
     pagination.total = data.total;
     pagination.pageSize = data.pageSize;
@@ -281,6 +287,11 @@ export function useCategory(tableRef: Ref) {
     // 动态获取产品类别列表
     const response = await getAgentSimpleList();
     agentItemLists.value = response.data;
+    var requestData = { category_name: "", currentPage: 1, pageSize: 100 };
+    const response2 = await getProductCategoryList(requestData);
+    productCategoryList.value = response2.data.list;
+    const response3 = await getProductInformationIdAndName();
+    productBaseInfoList.value = response3.data;
   });
 
   function handleExportCSV() {
@@ -449,7 +460,7 @@ export function useCategory(tableRef: Ref) {
     onSearch();
   }
 
-  function handleLookSupplierOrder(row?: FormItemProps) {
+  function handleLookSupplierOrder(row?: OrderItemProps) {
     // 查看供应商订单的逻辑
     addDialog({
       title: `相关供货单列表`,
@@ -469,12 +480,12 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleNotifyStatus(row?: FormItemProps) {
+  function handleNotifyStatus(row?: OrderItemProps) {
     // 通知状态的逻辑
     console.log("handleNotifyStatus", row);
   }
 
-  function handleChangeRemark(row?: FormItemProps) {
+  function handleChangeRemark(row?: OrderItemProps) {
     // 修改备注的逻辑
     addDialog({
       title: `修改订单备注`,
@@ -510,7 +521,7 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleBackupLog(row?: FormItemProps) {
+  function handleBackupLog(row?: OrderItemProps) {
     // 备份日志的逻辑
     addDialog({
       title: `备用通道重新提交记录`,
@@ -529,7 +540,7 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleSubmitLog(row?: FormItemProps) {
+  function handleSubmitLog(row?: OrderItemProps) {
     // 提交日志的逻辑
     addDialog({
       title: `提单日志`,
@@ -549,7 +560,7 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleQueryLog(row?: FormItemProps) {
+  function handleQueryLog(row?: OrderItemProps) {
     // 查询日志的逻辑
     addDialog({
       title: `提单日志`,
@@ -569,7 +580,7 @@ export function useCategory(tableRef: Ref) {
     });
   }
 
-  function handleNotifyLog(row?: FormItemProps) {
+  function handleNotifyLog(row?: OrderItemProps) {
     // 通知日志的逻辑
     addDialog({
       title: `提单日志`,
@@ -628,15 +639,15 @@ export function useCategory(tableRef: Ref) {
 function useProductHandlers() {
   const router = useRouter();
 
-  function handleAgentproduct(row?: FormItemProps) {
+  function handleAgentproduct(row?: OrderItemProps) {
     console.log("handleAgentChannel", row);
     if (row && row.id) {
       // 携带参数 row.id 跳转到产品配置页面
       router.push({
         path: "/agent/productchannel/index",
         query: {
-          agent_id: row.id,
-          agent_name: row.name
+          agent_id: row.agent_id,
+          agent_name: row.agent_name
         }
       });
     } else {

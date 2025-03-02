@@ -1,10 +1,12 @@
-import { orderFindPhone } from "@/api/order";
+import { getNumberBlackList, deleteNumberBlackList } from "@/api/order";
 import type { PaginationProps } from "@pureadmin/table";
 import { type Ref, reactive, ref, onMounted } from "vue";
+import type { BacklistItemProps } from "./types";
+import { getKeyList } from "@pureadmin/utils";
 
 export function useCategory(tableRef: Ref) {
   const form = reactive({
-    blacklist: ""
+    recharge_number: ""
   });
   const curRow = ref();
   const dataList = ref([]);
@@ -30,7 +32,7 @@ export function useCategory(tableRef: Ref) {
     },
     {
       label: "黑名单",
-      prop: "blacklist"
+      prop: "recharge_number"
     },
     {
       label: "备注",
@@ -71,7 +73,7 @@ export function useCategory(tableRef: Ref) {
   async function onSearch() {
     loading.value = true;
     var params = { ...form, ...pagination };
-    const { data } = await orderFindPhone(params);
+    const { data } = await getNumberBlackList(params);
     dataList.value = data.list;
     pagination.total = data.total;
     pagination.pageSize = data.pageSize;
@@ -112,7 +114,21 @@ export function useCategory(tableRef: Ref) {
   }
 
   function handleBatchDelete() {
-    console.log("handleAdd");
+    // 获取选中的数据
+    const curSelected = tableRef.value.getTableRef().getSelectionRows();
+    var ids = getKeyList(curSelected, "id");
+    deleteNumberBlackList(ids).then(() => {
+      onSearch();
+      onSelectionCancel();
+    });
+  }
+
+  function handleDelete(row?: BacklistItemProps) {
+    var params = [row.id];
+    deleteNumberBlackList(params).then(() => {
+      onSearch();
+      onSelectionCancel();
+    });
   }
 
   return {
@@ -130,6 +146,7 @@ export function useCategory(tableRef: Ref) {
     handleImportTemplateDownload,
     handleBatchDelete,
     resetForm,
+    handleDelete,
     handleSizeChange,
     handleCurrentChange,
     onSelectionCancel,

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, h } from "vue";
-import { SupplierOrderStatusList } from "@/api/constdata";
-import { getSupplierOrderList } from "@/api/order";
+import { OrderStatusList } from "@/api/constdata";
+import { getOrderList } from "@/api/order";
 const props = defineProps({
   order_id: {
     type: Number,
@@ -17,37 +17,51 @@ const columns: TableColumnList = [
     label: "订单号|下游单号",
     prop: "id",
     cellRenderer: ({ row }) => {
-      const label = row.order_id + h("br") + h("hr") + row.down_id;
-      return h("span", label);
+      return h("span", [
+        h("div", row.id),
+        h("hr", { style: "border-color: lightgray;" }),
+        h("div", row.down_id)
+      ]);
     }
   },
   {
-    label: "供货商ID",
-    prop: "supplier_id"
-  },
-  {
-    label: "供货商名称",
-    prop: "supplier_name"
-  },
-  {
-    label: "供货折扣|供货总价",
-    prop: "supplier_discount",
+    label: "代理商",
+    prop: "agent_id",
     cellRenderer: ({ row }) => {
-      const label =
-        row.supplier_discount +
-        h("br") +
-        h("hr") +
-        (row.supplier_discount * row.base_price * row.count).toFixed(2);
-      return h("span", label);
+      return h("span", [
+        h("div", row.agent_id),
+        h("hr", { style: "border-color: lightgray;" }),
+        h("div", row.agent_name)
+      ]);
     }
   },
   {
-    label: "供货单状态",
+    label: "代理折扣|代理总价",
+    prop: "agent_discount",
+    cellRenderer: ({ row }) => {
+      return h("span", [
+        h("div", row.agent_discount),
+        h("hr", { style: "border-color: lightgray;" }),
+        h("div", (row.agent_discount * row.base_price * row.count).toFixed(2))
+      ]);
+    }
+  },
+  {
+    label: "订单状态",
     prop: "status",
     cellRenderer: ({ row }) => {
       const label =
-        SupplierOrderStatusList.find(item => item.value === row.status)
-          ?.label || "";
+        OrderStatusList.find(item => item.value === row.status)?.label || "";
+      return h("span", label);
+    }
+  },
+  {
+    label: "订单状态",
+    prop: "status",
+    cellRenderer: ({ row }) => {
+      const label = OrderStatusList.find(
+        item => item.value === row.status
+      )?.label;
       return h("span", label);
     }
   },
@@ -55,25 +69,16 @@ const columns: TableColumnList = [
     label: "创建时间|完成时间",
     prop: "create_time",
     cellRenderer: ({ row }) => {
-      const label = row.create_time + h("br") + h("hr") + row.finish_time;
-      return h("span", label);
+      return h("span", [
+        h("div", row.create_time),
+        h("hr", { style: "border-color: lightgray;" }),
+        h("div", row.finish_time)
+      ]);
     }
-  },
-  {
-    label: "上游信息",
-    prop: "up_information"
   },
   {
     label: "备注",
     prop: "remark"
-  },
-  {
-    label: "备用通道重试",
-    prop: "is_backup",
-    cellRenderer: ({ row }) => {
-      const label = row.is_backup ? "是" : "否";
-      return h("span", label);
-    }
   }
 ];
 onMounted(async () => {
@@ -86,9 +91,11 @@ function getRef() {
 
 async function onSearch() {
   var requestData = {
-    order_id: order_id.value
+    id: String(order_id.value),
+    currentPage: 1,
+    pageSize: 100
   };
-  const { data } = await getSupplierOrderList(requestData);
+  const { data } = await getOrderList(requestData);
   console.log(data);
   dataList.value = data.list;
 }

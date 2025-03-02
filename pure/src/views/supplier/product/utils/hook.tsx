@@ -18,7 +18,7 @@ export function useDept() {
     business_type: "",
     supplier_id: "" as any,
     product_category: "",
-    product_id: "",
+    product_id: "" as any,
     product_name: "",
     operator: "",
     up_product_id: "",
@@ -205,7 +205,10 @@ export function useDept() {
 
   onMounted(async () => {
     //将form.supplier_id类型改为number
-    form.supplier_id = Number(route.query.supplier_id);
+    if (route.query.supplier_id)
+      form.supplier_id = Number(route.query.supplier_id);
+    if (route.query.product_id)
+      form.product_id = Number(route.query.product_id);
     onSearch();
     const response = await getSupplierSimpleList();
     supplierItemLists.value = response.data;

@@ -4,7 +4,8 @@ import type { PaginationProps } from "@pureadmin/table";
 import { type Ref, reactive, ref, onMounted } from "vue";
 
 import { getAgentSimpleList } from "@/api/agent";
-import { getOrderList } from "@/api/order";
+import { getInterceptOrderInfo } from "@/api/order";
+import { getProductInformationIdAndName } from "@/api/product";
 
 export function useCategory(tableRef: Ref) {
   const form = reactive({
@@ -42,6 +43,7 @@ export function useCategory(tableRef: Ref) {
         <span>
           {row.agent_id}
           <br />
+          <hr style="border-color: lightgray;" />
           {row.agent_name}
         </span>
       )
@@ -80,11 +82,11 @@ export function useCategory(tableRef: Ref) {
     },
     {
       label: "我方返回信息",
-      prop: "respone_information"
+      prop: "response_information"
     },
     {
       label: "返回时间",
-      prop: "respone_time"
+      prop: "response_time"
     },
     {
       label: "备注",
@@ -119,7 +121,8 @@ export function useCategory(tableRef: Ref) {
   async function onSearch() {
     loading.value = true;
     var params = { ...form, ...pagination };
-    const { data } = await getOrderList(params);
+    const { data } = await getInterceptOrderInfo(params);
+    console.log(data);
     dataList.value = data.list;
     pagination.total = data.total;
     pagination.pageSize = data.pageSize;
@@ -148,6 +151,8 @@ export function useCategory(tableRef: Ref) {
     // 动态获取产品类别列表
     const response = await getAgentSimpleList();
     agentItemLists.value = response.data;
+    const response3 = await getProductInformationIdAndName();
+    productBaseInfoList.value = response3.data;
   });
 
   function handleExportCSV() {

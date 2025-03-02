@@ -1,45 +1,36 @@
 <script setup lang="ts">
-import { onMounted, ref, h } from "vue";
-import { getAgentFundLog } from "@/api/agent";
-import {
-  FundOperationTypeList2,
-  SupplierOrderStatusList
-} from "@/api/constdata";
-import { agentOrderNotice } from "@/api/order";
+import { onMounted, ref } from "vue";
+import { supplierOrderCallbackLog } from "@/api/order";
 const props = defineProps({
-  order_id: {
+  supplier_order_id: {
     type: Number,
     default: 0
   }
 });
 
 const ruleFormRef = ref();
-const order_id = ref(props.order_id);
+const supplier_order_id = ref(props.supplier_order_id);
 const dataList = ref([]);
 const columns: TableColumnList = [
   {
-    label: "订单号",
-    prop: "order_id"
+    label: "供货单号",
+    prop: "supplier_order_id"
   },
   {
-    label: "发送日志",
-    prop: "send_log"
+    label: "回调方IP",
+    prop: "callback_ip"
   },
   {
-    label: "通知地址",
-    prop: "send_address"
+    label: "收到回调信息",
+    prop: "callback_context"
   },
   {
-    label: "代理商返回",
-    prop: "agent_return"
+    label: "收到回调时间",
+    prop: "callback_time"
   },
   {
-    label: "通知状态",
-    prop: "notify_status"
-  },
-  {
-    label: "通知时间",
-    prop: "notify_time"
+    label: "我方返回",
+    prop: "response_context"
   },
   {
     label: "备注",
@@ -56,9 +47,9 @@ function getRef() {
 
 async function onSearch() {
   var requestData = {
-    order_id: order_id.value
+    supplier_order_id: supplier_order_id.value
   };
-  const { data } = await agentOrderNotice(requestData);
+  const { data } = await supplierOrderCallbackLog(requestData);
   console.log(data);
   dataList.value = data;
 }

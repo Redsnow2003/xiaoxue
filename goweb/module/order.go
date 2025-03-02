@@ -29,6 +29,330 @@ func RegisterOrderRoutes(router *gin.Engine) {
 	router.PUT("/batch-order-timeout", batchOrderTimeout)
 	router.PUT("/batch-order-cancel",batchOrderCancel)
 	router.PUT("/batch-order-manual",batchOrderManual)
+	router.PUT("/update-supplier-order-remark",updateSupplierOrderRemark)
+	router.POST("/query-up-order-info",queryUpOrderInfo)
+	router.PUT("/supplier-order-fail-to-success",supplierOrderFailToSuccess)
+	router.POST("/intercept-order-info",getInterceptOrderInfo)
+	router.POST("/cache-order-list",getCacheOrderList)
+	router.POST("/order-find-phone",orderFindPhone)
+	router.POST("/number-black-list",getNumberBlackList)
+	router.DELETE("/delete-number-black-list",deleteNumberBlackList)
+}
+
+// @Tags 订单
+// @Summary 删除黑名单号码
+func deleteNumberBlackList(c *gin.Context) {
+	var ids []uint64
+	err := c.ShouldBindJSON(&ids)
+	if err != nil {
+		c.JSON(http.StatusOK,gin.H{"success":false,"message":"invalid input"})
+		return
+	}
+	db := model.Db
+	db.Where("id in ?", ids).Delete(&model.Order_number_blacklist{})
+	c.JSON(http.StatusOK,gin.H{"success":true,"message":""})
+}
+
+// @Tags 订单
+// @Summary 查询黑名单号码
+func getNumberBlackList(c *gin.Context) {
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK,gin.H{"success":false,"message":"invalid input"})
+		return
+	}
+	db := model.Db
+	page := requestData["currentPage"].(float64)
+	pageSize := requestData["pageSize"].(float64)
+	recharge_number := requestData["recharge_number"]
+	if recharge_number != nil && recharge_number != "" {
+		recharge_numberStr := strings.ReplaceAll(recharge_number.(string), " ", ",")
+		ls := strings.Split(recharge_numberStr, ",")
+		db = db.Where("recharge_number in (?)", ls)
+	}
+	offset := (page - 1) * pageSize
+	var total int64
+	var result []model.Order_number_blacklist
+	db.Model(&model.Order_number_blacklist{}).Count(&total)
+	db.Offset(int(offset)).Limit(int(pageSize)).Find(&result)
+	c.JSON(http.StatusOK,gin.H{"success":true,"message":"","data":gin.H{
+		"list":result,
+		"total":total,
+		"currentPage":page,
+		"pageSize":pageSize,
+	}})
+}
+
+// @Tags 订单
+// @Summary 查询订单手机号
+func orderFindPhone(c *gin.Context) {
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK,gin.H{"success":false,"message":"invalid input"})
+		return
+	}
+	db := model.Db
+	page := requestData["currentPage"].(float64)
+	pageSize := requestData["pageSize"].(float64)
+
+	recharge_number := requestData["recharge_number"]
+	if recharge_number != nil && recharge_number != "" {
+		recharge_numberStr := strings.ReplaceAll(recharge_number.(string), " ", ",")
+		ls := strings.Split(recharge_numberStr, ",")
+		db = db.Where("recharge_number in (?)", ls)
+	}
+
+	create_time := requestData["create_time"]
+	if create_time != nil && create_time != "" {
+		create_timeList := strings.Split(create_time.(string), "-")
+		if len(create_timeList) == 2 {
+			db = db.Where("create_time between ? and ?", create_timeList[0], create_timeList[1])
+		}
+	}
+
+	offset := (page - 1) * pageSize
+	var total int64
+	var result []model.Recharge_number
+	db.Model(&model.Recharge_number{}).Count(&total)
+	db.Offset(int(offset)).Limit(int(pageSize)).Find(&result)
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "", "data": gin.H{
+		"list":        result,
+		"total":       total,
+		"currentPage": page,
+		"pageSize":    pageSize,
+	}})
+}
+
+// @Tags 订单
+// @Summary 获取缓存订单列表
+func getCacheOrderList(c *gin.Context) {
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	db := model.Db
+	page := requestData["currentPage"].(float64)
+	pageSize := requestData["pageSize"].(float64)
+	business_type := requestData["business_type"]
+	switch business_type.(type) {
+	case float64:
+		db = db.Where("business_type = ?", business_type)
+	}
+	// 根据订单ID查询,如果有多个订单ID,则查询多个订单,ID之间用逗号分隔或者空格隔开
+	id := requestData["id"]
+	if id != nil && id != "" {
+		idStr := strings.ReplaceAll(id.(string), " ", ",")
+		ls := strings.Split(idStr, ",")
+		db = db.Where("id in (?)", ls)
+	}
+
+	down_id := requestData["down_id"]
+	if down_id != nil && down_id != "" {
+		down_idStr := strings.ReplaceAll(down_id.(string), " ", ",")
+		ls := strings.Split(down_idStr, ",")
+		db = db.Where("down_id in (?)", ls)
+	}
+
+	notify_status := requestData["notify_status"]
+	switch notify_status.(type) {
+	case float64:
+		db = db.Where("notify_status = ?", notify_status)
+	}
+
+	recharge_number := requestData["recharge_number"]
+	if recharge_number != nil && recharge_number != "" {
+		recharge_numberStr := strings.ReplaceAll(recharge_number.(string), " ", ",")
+		ls := strings.Split(recharge_numberStr, ",")
+		db = db.Where("recharge_number in (?)", ls)
+	}
+
+	agent_id := requestData["agent_id"]
+	switch agent_id.(type) {
+	case float64:
+		db = db.Where("agent_id = ?", agent_id)
+	}
+
+	product_category := requestData["product_category"]
+	switch product_category.(type) {
+	case float64:
+		db = db.Where("product_category = ?", product_category)
+	}
+
+	product_id := requestData["product_id"]
+	switch product_id.(type) {
+	case float64:
+		db = db.Where("product_id = ?", product_id)
+	}
+
+	base_price := requestData["base_price"]
+	switch base_price.(type) {
+	case float64:
+		db = db.Where("base_price = ?", base_price)
+	}
+
+	remark := requestData["remark"]
+	if remark != nil && remark != "" {
+		db = db.Where("remark like ?", "%"+remark.(string)+"%")
+	}
+
+	status := requestData["status"]
+	switch status.(type) {
+	case float64:
+		db = db.Where("status = ?", status)
+	}
+
+	is_timeout := requestData["is_timeout"]
+	switch is_timeout.(type) {
+	case float64:
+		db = db.Where("is_timeout = ?", is_timeout)
+	}
+
+	location := requestData["location"]
+	if location != nil && location != "" {
+		db = db.Where("location like ?", "%"+location.(string)+"%")
+	}
+
+	create_time := requestData["create_time"]
+	if create_time != nil && create_time != "" {
+		create_timeList := strings.Split(create_time.(string), "-")
+		if len(create_timeList) == 2 {
+			db = db.Where("create_time between ? and ?", create_timeList[0], create_timeList[1])
+		}
+	}
+
+	offset := (page - 1) * pageSize
+	var total int64
+	var result []model.Order_cache
+	db.Model(&model.Order_cache{}).Count(&total)
+	db.Offset(int(offset)).Limit(int(pageSize)).Find(&result)
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "", "data": gin.H{
+		"list":        result,
+		"total":       total,
+		"currentPage": page,
+		"pageSize":    pageSize,
+	}})
+}
+
+// @Tags 订单
+// @Summary 获取拦截订单信息
+func getInterceptOrderInfo(c *gin.Context) {
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	db := model.Db
+	page := requestData["currentPage"].(float64)
+	pageSize := requestData["pageSize"].(float64)
+
+	agent_id := requestData["agent_id"]
+	switch agent_id.(type) {
+	case float64:
+		db = db.Where("agent_id = ?", agent_id)
+	}
+	
+	down_id := requestData["down_id"].(string)
+	if down_id != "" {
+		db = db.Where("down_id = ?", down_id)
+	}
+
+	recharge_number := requestData["recharge_number"].(string)
+	if recharge_number != "" {
+		db = db.Where("recharge_number = ?", recharge_number)
+	}
+
+	product_id := requestData["product_id"]
+	switch product_id.(type) {
+	case float64:
+		db = db.Where("product_id = ?", product_id)
+	}
+
+	create_time := requestData["create_time"]
+	if create_time != nil && create_time != "" {
+		// 将create_time转为数组
+		create_time := requestData["create_time"].([]interface{})
+		if len(create_time) == 2 {
+			db = db.Where("create_time between ? and ?", create_time[0], create_time[1])
+		}
+	}
+	offset := (page - 1) * pageSize
+	var total int64
+	var result []model.Order_agent_intercept
+	db.Model(&model.Order_agent_intercept{}).Count(&total)
+	db.Offset(int(offset)).Limit(int(pageSize)).Find(&result)
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "", "data": gin.H{
+		"list":        result,
+		"total":       total,
+		"currentPage": page,
+		"pageSize":    pageSize,
+	}})
+}
+
+// @Tags 订单
+// @Summary 供应商订单失败转成功
+func supplierOrderFailToSuccess(c *gin.Context) {
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	id := requestData["id"].(float64)
+	var order model.Order_supplier
+	model.Db.Where("id = ?", id).First(&order)
+	order.Status = 1
+	model.Db.Save(&order)
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
+}
+
+// @Tags 订单
+// @Summary 查询上游订单信息
+func queryUpOrderInfo(c *gin.Context) {
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	up_id := requestData["up_id"].(string)
+	supplier_id := requestData["supplier_id"].(float64)
+	template_josn := getSupplierTemplateJsonString(uint64(supplier_id))
+	//解析json
+	var templateJson map[string]interface{}
+	json.Unmarshal([]byte(template_josn), &templateJson)
+	//获取查询地址
+	queryorder := templateJson["queryorder"].(string)
+	//发起http请求，查询订单信息
+	resp, err := http.Get(queryorder + "?up_id=" + up_id)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "query failed"})
+		return
+	}
+	defer resp.Body.Close()
+	//解析返回的json数据
+	var result map[string]interface{}
+	json.NewDecoder(resp.Body).Decode(&result)
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "", "data": result})
+}
+
+// @Tags 订单
+// @Summary 更新供应商订单备注
+func updateSupplierOrderRemark(c *gin.Context) {
+	var requestData map[string]interface{}
+	err := c.ShouldBindJSON(&requestData)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"success": false, "message": "invalid input"})
+		return
+	}
+	order_id := requestData["order_id"].(float64)
+	remark := requestData["remark"].(string)
+	model.Db.Model(&model.Order_supplier{}).Where("id = ?", order_id).Update("remark", remark)
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": ""})
 }
 
 // @Tags 订单

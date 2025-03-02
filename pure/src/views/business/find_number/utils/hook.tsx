@@ -1,6 +1,7 @@
+import { OperatorListAll, OrderStatusList } from "@/api/constdata";
 import { orderFindPhone } from "@/api/order";
 import type { PaginationProps } from "@pureadmin/table";
-import { reactive, ref, onMounted } from "vue";
+import { reactive, ref } from "vue";
 
 export function useCategory() {
   const form = reactive({
@@ -9,7 +10,7 @@ export function useCategory() {
   });
   const curRow = ref();
   const dataList = ref([]);
-  const loading = ref(true);
+  const loading = ref(false);
 
   const pagination = reactive<PaginationProps>({
     total: 0,
@@ -28,7 +29,12 @@ export function useCategory() {
     },
     {
       label: "运营商",
-      prop: "operator"
+      prop: "operator",
+      cellRenderer: ({ row }) => (
+        <span>
+          {OperatorListAll.find(item => item.value === row.operator)?.label}
+        </span>
+      )
     },
     {
       label: "归属地",
@@ -36,7 +42,12 @@ export function useCategory() {
     },
     {
       label: "订单状态",
-      prop: "status"
+      prop: "status",
+      cellRenderer: ({ row }) => (
+        <span>
+          {OrderStatusList.find(item => item.value === row.status)?.label}
+        </span>
+      )
     },
     {
       label: "创建时间",
@@ -85,9 +96,6 @@ export function useCategory() {
       background: id === curRow.value?.id ? "var(--el-fill-color-light)" : ""
     };
   }
-  onMounted(async () => {
-    onSearch();
-  });
 
   return {
     form,

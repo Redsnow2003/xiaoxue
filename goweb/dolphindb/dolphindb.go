@@ -8,10 +8,7 @@ import(
 
 func ConnectDb() (db api.DolphinDB, err error) {
 	// 读取配置文件
-	configBase, err := config.InitConfig()
-	if err != nil {
-		fmt.Printf("读取配置信息失败：%v", err)
-	}
+	configBase := config.GetConfig()
 	host := fmt.Sprintf("%s:%d", configBase.Dolphindb.Host, configBase.Dolphindb.Port)
 	db,err = api.NewSimpleDolphinDBClient(context.TODO(), host, configBase.Dolphindb.Username, configBase.Dolphindb.Password)
 	if err != nil {

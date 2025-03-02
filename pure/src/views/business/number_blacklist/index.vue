@@ -5,7 +5,7 @@ import { PureTableBar } from "@/components/RePureTableBar";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { getPickerShortcuts } from "@/api/utils";
 import { delay, deviceDetection, useResizeObserver } from "@pureadmin/utils";
-
+import Delete from "@iconify-icons/ep/delete";
 import Refresh from "@iconify-icons/ep/refresh";
 import AddFill from "@iconify-icons/ri/add-circle-line";
 
@@ -46,6 +46,7 @@ const {
   handleImport,
   handleImportTemplateDownload,
   handleBatchDelete,
+  handleDelete,
   resetForm,
   handleSizeChange,
   handleCurrentChange,
@@ -70,10 +71,10 @@ onMounted(async () => {
       :model="form"
       class="search-form bg-bg_color w-[99/100] pl-8 pt-[12px] overflow-auto"
     >
-      <el-form-item label="黑名单" prop="blacklist">
+      <el-form-item label="充值号码" prop="recharge_number">
         <el-input
-          v-model="form.blacklist"
-          placeholder="请输入黑名单"
+          v-model="form.recharge_number"
+          placeholder="多个用,或者空格隔开"
           clearable
           class="!w-[180px]"
         />
@@ -157,7 +158,20 @@ onMounted(async () => {
             @selection-change="handleSelectionChange"
             @page-size-change="handleSizeChange"
             @page-current-change="handleCurrentChange"
-          />
+          >
+            <template #operation="{ row }">
+              <el-button
+                class="reset-margin"
+                link
+                type="primary"
+                :size="size"
+                :icon="useRenderIcon(Delete)"
+                @click="handleDelete(row)"
+              >
+                删除
+              </el-button>
+            </template>
+          </pure-table>
         </template>
       </PureTableBar>
     </div>

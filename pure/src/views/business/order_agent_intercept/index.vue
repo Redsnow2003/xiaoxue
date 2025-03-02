@@ -86,7 +86,7 @@ onMounted(async () => {
       <el-form-item label="下游订单号" prop="down_id">
         <el-input
           v-model="form.down_id"
-          placeholder="多个用,或者空格隔开"
+          placeholder="下游订单号"
           clearable
           class="!w-[180px]"
         />
@@ -109,7 +109,7 @@ onMounted(async () => {
       <el-form-item label="充值号码" prop="recharge_number">
         <el-input
           v-model="form.recharge_number"
-          placeholder="多个用,或者空格隔开"
+          placeholder="充值号码"
           clearable
           class="!w-[180px]"
         />
